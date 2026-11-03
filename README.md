@@ -111,3 +111,7 @@ Standing on the shoulders of [Tauri](https://tauri.app),
 [CodeMirror](https://codemirror.net), [markdown-it](https://github.com/markdown-it/markdown-it),
 [DOMPurify](https://github.com/cure53/DOMPurify) and
 [highlight.js](https://highlightjs.org).
+
+## Licence
+
+Released under the MIT licence — see [LICENSE](LICENSE) for the full text.
