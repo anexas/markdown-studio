@@ -115,3 +115,10 @@ Standing on the shoulders of [Tauri](https://tauri.app),
 ## Licence
 
 Released under the MIT licence — see [LICENSE](LICENSE) for the full text.
+
+## Third-party notices
+
+The application bundles third-party libraries whose licences require their notices to
+travel with it — CodeMirror, markdown-it, DOMPurify, highlight.js and their transitive
+dependencies, plus the Rust crates linked into the executable. The full list and licence
+texts are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

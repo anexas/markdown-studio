@@ -1,0 +1,989 @@
+# Third-party notices
+
+Markdown Studio 0.5.1 is built on third-party software. This file lists the
+components distributed with it and reproduces the licence texts those licences require.
+
+Generated from package-lock.json and `cargo metadata` on 2026-11-03.
+
+## JavaScript bundled into the interface
+
+72 packages.
+
+| Component | Version | Licence |
+| --- | --- | --- |
+| @codemirror/autocomplete | 6.20.4 | MIT |
+| @codemirror/commands | 6.11.1 | MIT |
+| @codemirror/lang-angular | 0.1.4 | MIT |
+| @codemirror/lang-cpp | 6.0.3 | MIT |
+| @codemirror/lang-css | 6.3.1 | MIT |
+| @codemirror/lang-go | 6.0.1 | MIT |
+| @codemirror/lang-html | 6.4.12 | MIT |
+| @codemirror/lang-java | 6.0.2 | MIT |
+| @codemirror/lang-javascript | 6.2.5 | MIT |
+| @codemirror/lang-jinja | 6.0.1 | MIT |
+| @codemirror/lang-json | 6.0.2 | MIT |
+| @codemirror/lang-less | 6.0.2 | MIT |
+| @codemirror/lang-liquid | 6.3.3 | MIT |
+| @codemirror/lang-markdown | 6.5.2 | MIT |
+| @codemirror/lang-php | 6.0.2 | MIT |
+| @codemirror/lang-python | 6.2.1 | MIT |
+| @codemirror/lang-rust | 6.0.2 | MIT |
+| @codemirror/lang-sass | 6.0.2 | MIT |
+| @codemirror/lang-sql | 6.10.0 | MIT |
+| @codemirror/lang-vue | 0.1.3 | MIT |
+| @codemirror/lang-wast | 6.0.2 | MIT |
+| @codemirror/lang-xml | 6.1.0 | MIT |
+| @codemirror/lang-yaml | 6.1.3 | MIT |
+| @codemirror/language | 6.13.1 | MIT |
+| @codemirror/language-data | 6.5.2 | MIT |
+| @codemirror/legacy-modes | 6.5.5 | MIT |
+| @codemirror/lint | 6.9.7 | MIT |
+| @codemirror/search | 6.7.2 | MIT |
+| @codemirror/state | 6.7.6 | MIT |
+| @codemirror/streamparser | 6.0.0 | MIT |
+| @codemirror/theme-one-dark | 6.1.3 | MIT |
+| @codemirror/view | 6.43.15 | MIT |
+| @lezer/common | 1.5.5 | MIT |
+| @lezer/cpp | 1.1.6 | MIT |
+| @lezer/css | 1.3.9 | MIT |
+| @lezer/go | 1.0.1 | MIT |
+| @lezer/highlight | 1.2.5 | MIT |
+| @lezer/html | 1.3.13 | MIT |
+| @lezer/java | 1.1.5 | MIT |
+| @lezer/javascript | 1.5.6 | MIT |
+| @lezer/json | 1.0.3 | MIT |
+| @lezer/lr | 1.4.12 | MIT |
+| @lezer/markdown | 1.8.1 | MIT |
+| @lezer/php | 1.0.6 | MIT |
+| @lezer/python | 1.1.19 | MIT |
+| @lezer/rust | 1.0.3 | MIT |
+| @lezer/sass | 1.1.0 | MIT |
+| @lezer/xml | 1.0.6 | MIT |
+| @lezer/yaml | 1.0.4 | MIT |
+| @marijn/find-cluster-break | 1.0.4 | MIT |
+| @tauri-apps/api | 2.12.4 | Apache-2.0 |
+| @tauri-apps/plugin-dialog | 2.8.4 | Apache-2.0 |
+| @types/linkify-it | 5.0.0 | MIT |
+| @types/markdown-it | 14.2.0 | MIT |
+| @types/mdurl | 2.0.0 | MIT |
+| @types/trusted-types | 2.0.7 | MIT |
+| argparse | 2.0.1 | Python-2.0 |
+| crelt | 1.0.7 | MIT |
+| dompurify | 3.4.17 | Apache-2.0 |
+| entities | 4.5.0 | BSD-2-Clause |
+| github-markdown-css | 5.9.0 | MIT |
+| highlight.js | 11.12.0 | BSD-3-Clause |
+| linkify-it | 5.0.2 | MIT |
+| markdown-it | 14.3.3 | MIT |
+| markdown-it-anchor | 9.2.1 | Unlicense |
+| markdown-it-footnote | 4.0.0 | MIT |
+| markdown-it-task-lists | 2.1.1 | ISC |
+| mdurl | 2.1.0 | MIT |
+| punycode.js | 2.3.1 | MIT |
+| style-mod | 4.1.4 | MIT |
+| uc.micro | 2.1.0 | MIT |
+| w3c-keyname | 2.2.8 | MIT |
+
+## Rust crates linked into the executable
+
+253 crates resolved for x86_64-pc-windows-msvc. Crate sources are available
+from crates.io, and each crate's repository is linked from its crates.io page.
+
+| Crate | Version | Licence |
+| --- | --- | --- |
+| adler2 | 2.0.1 | Apache-2.0 |
+| aho-corasick | 1.1.5 | MIT |
+| alloc-no-stdlib | 3.0.0 | BSD-3-Clause |
+| alloc-stdlib | 0.3.0 | BSD-3-Clause |
+| anyhow | 1.0.104 | Apache-2.0 |
+| autocfg | 1.5.1 | Apache-2.0 |
+| base64 | 0.22.1 | Apache-2.0 |
+| base64 | 0.23.1 | Apache-2.0 |
+| bit-set | 0.8.0 | Apache-2.0 |
+| bit-vec | 0.8.0 | Apache-2.0 |
+| bitflags | 1.3.2 | MIT/Apache-2.0 |
+| bitflags | 2.13.2 | Apache-2.0 |
+| block-buffer | 0.10.4 | Apache-2.0 |
+| brotli | 9.1.1 | BSD-3-Clause AND MIT |
+| brotli-decompressor | 6.2.0 | BSD-3-Clause/MIT |
+| bs58 | 0.5.1 | MIT/Apache-2.0 |
+| byteorder | 1.5.0 | MIT |
+| bytes | 1.12.1 | MIT |
+| camino | 1.2.6 | Apache-2.0 |
+| cargo_metadata | 0.19.2 | MIT |
+| cargo_toml | 1.0.1 | Apache-2.0 |
+| cargo-platform | 0.1.9 | Apache-2.0 |
+| cc | 1.11.0 | Apache-2.0 |
+| cfb | 0.14.0 | MIT |
+| cfg-if | 1.0.5 | Apache-2.0 |
+| chrono | 0.4.45 | Apache-2.0 |
+| cookie | 0.18.2 | Apache-2.0 |
+| cpufeatures | 0.2.17 | Apache-2.0 |
+| crc32fast | 1.5.4 | Apache-2.0 |
+| crossbeam-channel | 0.5.17 | Apache-2.0 |
+| crossbeam-utils | 0.8.23 | Apache-2.0 |
+| crypto-common | 0.1.7 | Apache-2.0 |
+| cssparser | 0.37.0 | MPL-2.0 |
+| cssparser-macros | 0.7.1 | MPL-2.0 |
+| ctor | 1.0.13 | Apache-2.0 |
+| darling | 0.24.1 | MIT |
+| darling_core | 0.24.1 | MIT |
+| darling_macro | 0.24.1 | MIT |
+| defmt | 1.2.0 | Apache-2.0 |
+| defmt-macros | 1.2.0 | Apache-2.0 |
+| defmt-parser | 1.1.0 | Apache-2.0 |
+| deranged | 0.5.9 | Apache-2.0 |
+| derive_more | 2.1.1 | MIT |
+| derive_more-impl | 2.1.1 | MIT |
+| digest | 0.10.7 | Apache-2.0 |
+| dirs | 7.0.0 | Apache-2.0 |
+| dirs-sys | 0.5.0 | Apache-2.0 |
+| displaydoc | 0.2.7 | Apache-2.0 |
+| dom_query | 0.28.0 | MIT |
+| dpi | 0.1.2 | Apache-2.0 AND MIT |
+| dtoa | 1.0.11 | Apache-2.0 |
+| dtoa-short | 0.3.5 | MPL-2.0 |
+| dunce | 1.0.5 | Apache-2.0 |
+| dyn-clone | 1.0.20 | Apache-2.0 |
+| embed-resource | 3.0.12 | MIT |
+| equivalent | 1.0.3 | Apache-2.0 |
+| erased-serde | 0.4.11 | Apache-2.0 |
+| fastrand | 2.5.0 | Apache-2.0 |
+| fdeflate | 0.3.7 | Apache-2.0 |
+| find-msvc-tools | 0.1.15 | Apache-2.0 |
+| flate2 | 1.1.10 | Apache-2.0 |
+| fnv | 1.0.7 | Apache-2.0 / MIT |
+| foldhash | 0.2.0 | Zlib |
+| form_urlencoded | 1.2.2 | Apache-2.0 |
+| generic-array | 0.14.7 | MIT |
+| getrandom | 0.3.4 | Apache-2.0 |
+| getrandom | 0.4.3 | Apache-2.0 |
+| glob | 0.3.4 | Apache-2.0 |
+| hashbrown | 0.12.3 | Apache-2.0 |
+| hashbrown | 0.17.1 | Apache-2.0 |
+| heck | 0.5.0 | Apache-2.0 |
+| hex | 0.4.3 | Apache-2.0 |
+| html5ever | 0.39.0 | Apache-2.0 |
+| http | 1.5.0 | Apache-2.0 |
+| ico | 0.6.0 | MIT |
+| icu_collections | 2.4.0 | Unicode-3.0 |
+| icu_locale_core | 2.4.0 | Unicode-3.0 |
+| icu_normalizer | 2.4.0 | Unicode-3.0 |
+| icu_normalizer_data | 2.4.0 | Unicode-3.0 |
+| icu_properties | 2.4.0 | Unicode-3.0 |
+| icu_properties_data | 2.4.0 | Unicode-3.0 |
+| icu_provider | 2.4.0 | Unicode-3.0 |
+| ident_case | 1.0.1 | MIT/Apache-2.0 |
+| idna | 1.1.0 | Apache-2.0 |
+| idna_adapter | 1.2.2 | Apache-2.0 |
+| indexmap | 1.9.3 | Apache-2.0 |
+| indexmap | 2.14.2 | Apache-2.0 |
+| infer | 0.22.0 | MIT |
+| itoa | 1.0.18 | Apache-2.0 |
+| jiff | 0.2.39 | MIT |
+| jiff-core | 0.1.2 | MIT |
+| jiff-tzdb | 0.1.9 | MIT |
+| jiff-tzdb-platform | 0.1.3 | MIT |
+| json-patch | 4.2.0 | MIT/Apache-2.0 |
+| jsonptr | 0.7.1 | Apache-2.0 |
+| keyboard-types | 0.8.3 | Apache-2.0 |
+| libc | 0.2.191 | Apache-2.0 |
+| litemap | 0.8.3 | Unicode-3.0 |
+| lock_api | 0.4.14 | Apache-2.0 |
+| log | 0.4.35 | Apache-2.0 |
+| markup5ever | 0.39.0 | Apache-2.0 |
+| memchr | 2.8.3 | MIT |
+| mime | 0.3.17 | Apache-2.0 |
+| miniz_oxide | 0.8.9 | Apache-2.0 |
+| miniz_oxide | 0.9.1 | Apache-2.0 |
+| mio | 1.2.4 | MIT |
+| muda | 0.20.0 | Apache-2.0 |
+| new_debug_unreachable | 1.0.6 | MIT |
+| num-conv | 0.2.2 | Apache-2.0 |
+| num-traits | 0.2.19 | Apache-2.0 |
+| once_cell | 1.21.4 | Apache-2.0 |
+| open | 5.4.5 | MIT |
+| option-ext | 0.2.0 | MPL-2.0 |
+| parking_lot | 0.12.5 | Apache-2.0 |
+| parking_lot_core | 0.9.12 | Apache-2.0 |
+| percent-encoding | 2.3.2 | Apache-2.0 |
+| phf | 0.13.1 | MIT |
+| phf_codegen | 0.13.1 | MIT |
+| phf_generator | 0.13.1 | MIT |
+| phf_macros | 0.13.1 | MIT |
+| phf_shared | 0.13.1 | MIT |
+| pin-project-lite | 0.2.17 | Apache-2.0 |
+| plist | 1.10.3 | MIT |
+| png | 0.18.1 | Apache-2.0 |
+| potential_utf | 0.1.6 | Unicode-3.0 |
+| powerfmt | 0.2.1 | Apache-2.0 |
+| precomputed-hash | 0.1.1 | MIT |
+| proc-macro2 | 1.0.107 | Apache-2.0 |
+| quick-xml | 0.42.0 | MIT |
+| quote | 1.0.47 | Apache-2.0 |
+| raw-window-handle | 0.6.2 | Apache-2.0 |
+| ref-cast | 1.0.27 | Apache-2.0 |
+| ref-cast-impl | 1.0.27 | Apache-2.0 |
+| regex | 1.13.1 | Apache-2.0 |
+| regex-automata | 0.4.18 | Apache-2.0 |
+| regex-syntax | 0.8.11 | Apache-2.0 |
+| rfd | 0.17.2 | MIT |
+| rustc_version | 0.4.1 | Apache-2.0 |
+| rustc-hash | 2.1.3 | Apache-2.0 |
+| same-file | 1.0.6 | Unlicense/MIT |
+| schemars | 0.8.22 | MIT |
+| schemars | 0.9.0 | MIT |
+| schemars | 1.2.3 | MIT |
+| schemars_derive | 0.8.22 | MIT |
+| scopeguard | 1.2.0 | Apache-2.0 |
+| selectors | 0.38.0 | MPL-2.0 |
+| semver | 1.0.28 | Apache-2.0 |
+| serde | 1.0.229 | Apache-2.0 |
+| serde_core | 1.0.229 | Apache-2.0 |
+| serde_derive | 1.0.229 | Apache-2.0 |
+| serde_derive_internals | 0.29.1 | Apache-2.0 |
+| serde_json | 1.0.154 | Apache-2.0 |
+| serde_repr | 0.1.21 | Apache-2.0 |
+| serde_spanned | 1.1.2 | Apache-2.0 |
+| serde_with | 3.24.0 | Apache-2.0 |
+| serde_with_macros | 3.24.0 | Apache-2.0 |
+| serde-untagged | 0.1.9 | Apache-2.0 |
+| serialize-to-javascript | 0.1.2 | Apache-2.0 |
+| serialize-to-javascript-impl | 0.1.2 | Apache-2.0 |
+| servo_arc | 0.4.3 | Apache-2.0 |
+| sha2 | 0.10.9 | Apache-2.0 |
+| shlex | 2.0.1 | Apache-2.0 |
+| simd-adler32 | 0.3.10 | MIT |
+| siphasher | 1.0.4 | Apache-2.0 |
+| smallvec | 1.16.4 | Apache-2.0 |
+| socket2 | 0.6.5 | Apache-2.0 |
+| softbuffer | 0.4.8 | Apache-2.0 |
+| stable_deref_trait | 1.2.1 | Apache-2.0 |
+| static_vcruntime | 3.0.0 | Apache-2.0 |
+| string_cache | 0.9.0 | Apache-2.0 |
+| string_cache_codegen | 0.6.1 | Apache-2.0 |
+| strsim | 0.11.1 | MIT |
+| syn | 2.0.119 | Apache-2.0 |
+| syn | 3.0.9 | Apache-2.0 |
+| synstructure | 0.14.0 | MIT |
+| tao | 0.37.2 | Apache-2.0 |
+| tauri | 2.12.5 | Apache-2.0 |
+| tauri-build | 2.7.4 | Apache-2.0 |
+| tauri-codegen | 2.7.4 | Apache-2.0 |
+| tauri-macros | 2.7.4 | Apache-2.0 |
+| tauri-plugin | 2.7.2 | Apache-2.0 |
+| tauri-plugin-dialog | 2.8.4 | Apache-2.0 |
+| tauri-plugin-fs | 2.7.1 | Apache-2.0 |
+| tauri-plugin-opener | 2.7.2 | Apache-2.0 |
+| tauri-plugin-single-instance | 2.5.5 | Apache-2.0 |
+| tauri-plugin-window-state | 2.5.0 | Apache-2.0 |
+| tauri-runtime | 2.12.2 | Apache-2.0 |
+| tauri-runtime-wry | 2.12.3 | Apache-2.0 |
+| tauri-utils | 2.10.2 | Apache-2.0 |
+| tauri-winres | 0.3.7 | MIT |
+| tendril | 0.5.1 | Apache-2.0 |
+| thiserror | 2.0.21 | Apache-2.0 |
+| thiserror-impl | 2.0.21 | Apache-2.0 |
+| time | 0.3.55 | Apache-2.0 |
+| time-core | 0.1.9 | Apache-2.0 |
+| time-macros | 0.2.32 | Apache-2.0 |
+| tinystr | 0.8.5 | Unicode-3.0 |
+| tinyvec | 1.13.3 | Apache-2.0 |
+| tokio | 1.54.1 | MIT |
+| toml | 1.1.8+spec-1.1.0 | Apache-2.0 |
+| toml_datetime | 1.1.2+spec-1.1.0 | Apache-2.0 |
+| toml_parser | 1.1.5+spec-1.1.0 | Apache-2.0 |
+| toml_writer | 1.1.3+spec-1.1.0 | Apache-2.0 |
+| tracing | 0.1.44 | MIT |
+| tracing-attributes | 0.1.31 | MIT |
+| tracing-core | 0.1.36 | MIT |
+| tray-icon | 0.25.1 | Apache-2.0 |
+| typeid | 1.0.3 | Apache-2.0 |
+| typenum | 1.20.1 | Apache-2.0 |
+| unicode-ident | 1.0.27 | MIT |
+| unicode-segmentation | 1.13.3 | Apache-2.0 |
+| url | 2.5.8 | Apache-2.0 |
+| urlpattern | 0.6.0 | MIT |
+| utf_types | 1.0.0 | Apache-2.0 |
+| utf8_iter | 1.1.0 | Apache-2.0 |
+| uuid | 1.29.0 | Apache-2.0 |
+| version_check | 0.9.5 | MIT/Apache-2.0 |
+| vswhom | 0.1.0 | MIT |
+| vswhom-sys | 0.1.3 | MIT |
+| walkdir | 2.5.0 | Unlicense/MIT |
+| web_atoms | 0.2.6 | Apache-2.0 |
+| web-time | 1.1.0 | Apache-2.0 |
+| webview2-com | 0.39.1 | MIT |
+| webview2-com-macros | 0.8.1 | MIT |
+| webview2-com-sys | 0.39.1 | MIT |
+| winapi-util | 0.1.11 | MIT |
+| window-vibrancy | 0.8.1 | Apache-2.0 |
+| windows | 0.62.2 | Apache-2.0 |
+| windows-collections | 0.3.2 | Apache-2.0 |
+| windows-core | 0.62.2 | Apache-2.0 |
+| windows-future | 0.3.2 | Apache-2.0 |
+| windows-implement | 0.60.2 | Apache-2.0 |
+| windows-interface | 0.59.3 | Apache-2.0 |
+| windows-link | 0.2.1 | Apache-2.0 |
+| windows-numerics | 0.3.1 | Apache-2.0 |
+| windows-result | 0.4.1 | Apache-2.0 |
+| windows-strings | 0.5.1 | Apache-2.0 |
+| windows-sys | 0.61.2 | Apache-2.0 |
+| windows-threading | 0.2.1 | Apache-2.0 |
+| windows-version | 0.1.7 | Apache-2.0 |
+| winnow | 1.0.4 | MIT |
+| winreg | 0.56.0 | MIT |
+| writeable | 0.6.4 | Unicode-3.0 |
+| wry | 0.57.1 | Apache-2.0 |
+| yoke | 0.8.4 | Unicode-3.0 |
+| yoke-derive | 0.8.4 | Unicode-3.0 |
+| zerofrom | 0.1.8 | Unicode-3.0 |
+| zerofrom-derive | 0.1.8 | Unicode-3.0 |
+| zerotrie | 0.2.5 | Unicode-3.0 |
+| zerovec | 0.11.9 | Unicode-3.0 |
+| zerovec-derive | 0.11.7 | Unicode-3.0 |
+| zlib-rs | 0.6.8 | Zlib |
+| zmij | 1.0.23 | MIT |
+
+## Licence texts
+
+### Apache-2.0
+
+Applies to 3 packages: @tauri-apps/api 2.12.4, @tauri-apps/plugin-dialog 2.8.4, dompurify 3.4.17.
+
+"Licensor" shall mean the copyright owner or entity authorized by
+Copyright (c) 2017 - Present Tauri Apps Contributors
+The above copyright notice and this permission notice shall be included in all
+the copyright owner that is granting the License.
+
+```
+Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+```
+
+### BSD-2-Clause
+
+Applies to 1 package: entities 4.5.0.
+
+Copyright (c) Felix Böhm
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+```
+Copyright (c) Felix Böhm
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
+
+### BSD-3-Clause
+
+Applies to 1 package: highlight.js 11.12.0.
+
+* Redistributions of source code must retain the above copyright notice, this
+Copyright (c) 2006, Ivan Sagalaev.
+
+```
+BSD 3-Clause License
+
+Copyright (c) 2006, Ivan Sagalaev.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
+
+### ISC
+
+Applies to 1 package: markdown-it-task-lists 2.1.1.
+
+Copyright (c) 2016, Revin Guillen
+copyright notice and this permission notice appear in all copies.
+
+```
+Copyright (c) 2016, Revin Guillen
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
+### MIT
+
+Applies to 64 packages: @codemirror/autocomplete 6.20.4, @codemirror/commands 6.11.1, @codemirror/lang-angular 0.1.4, @codemirror/lang-cpp 6.0.3, @codemirror/lang-css 6.3.1, @codemirror/lang-go 6.0.1, @codemirror/lang-html 6.4.12, @codemirror/lang-java 6.0.2, @codemirror/lang-javascript 6.2.5, @codemirror/lang-jinja 6.0.1, @codemirror/lang-json 6.0.2, @codemirror/lang-less 6.0.2, @codemirror/lang-liquid 6.3.3, @codemirror/lang-markdown 6.5.2, @codemirror/lang-php 6.0.2, @codemirror/lang-python 6.2.1, @codemirror/lang-rust 6.0.2, @codemirror/lang-sass 6.0.2, @codemirror/lang-sql 6.10.0, @codemirror/lang-vue 0.1.3, @codemirror/lang-wast 6.0.2, @codemirror/lang-xml 6.1.0, @codemirror/lang-yaml 6.1.3, @codemirror/language 6.13.1, @codemirror/language-data 6.5.2, @codemirror/legacy-modes 6.5.5, @codemirror/lint 6.9.7, @codemirror/search 6.7.2, @codemirror/state 6.7.6, @codemirror/streamparser 6.0.0, @codemirror/theme-one-dark 6.1.3, @codemirror/view 6.43.15, @lezer/common 1.5.5, @lezer/cpp 1.1.6, @lezer/css 1.3.9, @lezer/go 1.0.1, @lezer/highlight 1.2.5, @lezer/html 1.3.13, @lezer/java 1.1.5, @lezer/javascript 1.5.6, @lezer/json 1.0.3, @lezer/lr 1.4.12, @lezer/markdown 1.8.1, @lezer/php 1.0.6, @lezer/python 1.1.19, @lezer/rust 1.0.3, @lezer/sass 1.1.0, @lezer/xml 1.0.6, @lezer/yaml 1.0.4, @marijn/find-cluster-break 1.0.4, @types/linkify-it 5.0.0, @types/markdown-it 14.2.0, @types/mdurl 2.0.0, @types/trusted-types 2.0.7, crelt 1.0.7, github-markdown-css 5.9.0, linkify-it 5.0.2, markdown-it 14.3.3, markdown-it-footnote 4.0.0, mdurl 2.1.0, punycode.js 2.3.1, style-mod 4.1.4, uc.micro 2.1.0, w3c-keyname 2.2.8.
+
+Copyright (C) 2016 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Copyright (C) 2018-2023 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Copyright (C) 2020 by Marijn Haverbeke <marijn@haverbeke.berlin>
+Copyright (C) 2020 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Copyright (C) 2020 by Marijn Haverbeke <marijn@haverbeke.berlin>, Arun Srinivasan <rulfzid@gmail.com>, and others
+Copyright (C) 2024 by Marijn Haverbeke <marijn@haverbeke.berlin>
+Copyright (C) 2024 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Copyright (C) 2024 by Marijn Haverbeke <marijnh@gmail.com> and others
+Copyright (C) 2025 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Copyright (c) 2014 Vitaly Puzrin, Alex Kocharin.
+Copyright (c) 2014-2015 Vitaly Puzrin, Alex Kocharin.
+Copyright (c) 2015 Vitaly Puzrin, Alex Kocharin.
+Copyright (c) 2015 Vitaly Puzrin.
+Copyright (c) Microsoft Corporation.
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+Copyright Mathias Bynens <https://mathiasbynens.be/>
+The above copyright notice and this permission notice shall be
+The above copyright notice and this permission notice shall be included in
+The above copyright notice and this permission notice shall be included in all
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+```
+Copyright (c) 2015 Vitaly Puzrin, Alex Kocharin.
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+
+.parse() is based on Joyent's node.js `url` code:
+
+Copyright Joyent, Inc. and other Node contributors. All rights reserved.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to
+deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+```
+
+### Python-2.0
+
+Applies to 1 package: argparse 2.0.1.
+
+i.e., "Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
+provided, however, that PSF's License Agreement and PSF's notice of copyright,
+
+```
+A. HISTORY OF THE SOFTWARE
+==========================
+
+Python was created in the early 1990s by Guido van Rossum at Stichting
+Mathematisch Centrum (CWI, see http://www.cwi.nl) in the Netherlands
+as a successor of a language called ABC.  Guido remains Python's
+principal author, although it includes many contributions from others.
+
+In 1995, Guido continued his work on Python at the Corporation for
+National Research Initiatives (CNRI, see http://www.cnri.reston.va.us)
+in Reston, Virginia where he released several versions of the
+software.
+
+In May 2000, Guido and the Python core development team moved to
+BeOpen.com to form the BeOpen PythonLabs team.  In October of the same
+year, the PythonLabs team moved to Digital Creations, which became
+Zope Corporation.  In 2001, the Python Software Foundation (PSF, see
+https://www.python.org/psf/) was formed, a non-profit organization
+created specifically to own Python-related Intellectual Property.
+Zope Corporation was a sponsoring member of the PSF.
+
+All Python releases are Open Source (see http://www.opensource.org for
+the Open Source Definition).  Historically, most, but not all, Python
+releases have also been GPL-compatible; the table below summarizes
+the various releases.
+
+    Release         Derived     Year        Owner       GPL-
+                    from                                compatible? (1)
+
+    0.9.0 thru 1.2              1991-1995   CWI         yes
+    1.3 thru 1.5.2  1.2         1995-1999   CNRI        yes
+    1.6             1.5.2       2000        CNRI        no
+    2.0             1.6         2000        BeOpen.com  no
+    1.6.1           1.6         2001        CNRI        yes (2)
+    2.1             2.0+1.6.1   2001        PSF         no
+    2.0.1           2.0+1.6.1   2001        PSF         yes
+    2.1.1           2.1+2.0.1   2001        PSF         yes
+    2.1.2           2.1.1       2002        PSF         yes
+    2.1.3           2.1.2       2002        PSF         yes
+    2.2 and above   2.1.1       2001-now    PSF         yes
+
+Footnotes:
+
+(1) GPL-compatible doesn't mean that we're distributing Python under
+    the GPL.  All Python licenses, unlike the GPL, let you distribute
+    a modified version without making your changes open source.  The
+    GPL-compatible licenses make it possible to combine Python with
+    other software that is released under the GPL; the others don't.
+
+(2) According to Richard Stallman, 1.6.1 is not GPL-compatible,
+    because its license has a choice of law clause.  According to
+    CNRI, however, Stallman's lawyer has told CNRI's lawyer that 1.6.1
+    is "not incompatible" with the GPL.
+
+Thanks to the many outside volunteers who have worked under Guido's
+direction to make these releases possible.
+
+
+B. TERMS AND CONDITIONS FOR ACCESSING OR OTHERWISE USING PYTHON
+===============================================================
+
+PYTHON SOFTWARE FOUNDATION LICENSE VERSION 2
+--------------------------------------------
+
+1. This LICENSE AGREEMENT is between the Python Software Foundation
+("PSF"), and the Individual or Organization ("Licensee") accessing and
+otherwise using this software ("Python") in source or binary form and
+its associated documentation.
+
+2. Subject to the terms and conditions of this License Agreement, PSF hereby
+grants Licensee a nonexclusive, royalty-free, world-wide license to reproduce,
+analyze, test, perform and/or display publicly, prepare derivative works,
+distribute, and otherwise use Python alone or in any derivative version,
+provided, however, that PSF's License Agreement and PSF's notice of copyright,
+i.e., "Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
+2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 Python Software Foundation;
+All Rights Reserved" are retained in Python alone or in any derivative version
+prepared by Licensee.
+
+3. In the event Licensee prepares a derivative work that is based on
+or incorporates Python or any part thereof, and wants to make
+the derivative work available to others as provided herein, then
+Licensee hereby agrees to include in any such work a brief summary of
+the changes made to Python.
+
+4. PSF is making Python available to Licensee on an "AS IS"
+basis.  PSF MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, PSF MAKES NO AND
+DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS
+FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF PYTHON WILL NOT
+INFRINGE ANY THIRD PARTY RIGHTS.
+
+5. PSF SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF PYTHON
+FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR LOSS AS
+A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING PYTHON,
+OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.
+
+6. This License Agreement will automatically terminate upon a material
+breach of its terms and conditions.
+
+7. Nothing in this License Agreement shall be deemed to create any
+relationship of agency, partnership, or joint venture between PSF and
+Licensee.  This License Agreement does not grant permission to use PSF
+trademarks or trade name in a trademark sense to endorse or promote
+products or services of Licensee, or any third party.
+
+8. By copying, installing or otherwise using Python, Licensee
+agrees to be bound by the terms and conditions of this License
+Agreement.
+
+
+BEOPEN.COM LICENSE AGREEMENT FOR PYTHON 2.0
+-------------------------------------------
+
+BEOPEN PYTHON OPEN SOURCE LICENSE AGREEMENT VERSION 1
+
+1. This LICENSE AGREEMENT is between BeOpen.com ("BeOpen"), having an
+office at 160 Saratoga Avenue, Santa Clara, CA 95051, and the
+Individual or Organization ("Licensee") accessing and otherwise using
+this software in source or binary form and its associated
+documentation ("the Software").
+
+2. Subject to the terms and conditions of this BeOpen Python License
+Agreement, BeOpen hereby grants Licensee a non-exclusive,
+royalty-free, world-wide license to reproduce, analyze, test, perform
+and/or display publicly, prepare derivative works, distribute, and
+otherwise use the Software alone or in any derivative version,
+provided, however, that the BeOpen Python License is retained in the
+Software, alone or in any derivative version prepared by Licensee.
+
+3. BeOpen is making the Software available to Licensee on an "AS IS"
+basis.  BEOPEN MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, BEOPEN MAKES NO AND
+DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS
+FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE SOFTWARE WILL NOT
+INFRINGE ANY THIRD PARTY RIGHTS.
+
+4. BEOPEN SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF THE
+SOFTWARE FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR LOSS
+AS A RESULT OF USING, MODIFYING OR DISTRIBUTING THE SOFTWARE, OR ANY
+DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.
+
+5. This License Agreement will automatically terminate upon a material
+breach of its terms and conditions.
+
+6. This License Agreement shall be governed by and interpreted in all
+respects by the law of the State of California, excluding conflict of
+law provisions.  Nothing in this License Agreement shall be deemed to
+create any relationship of agency, partnership, or joint venture
+between BeOpen and Licensee.  This License Agreement does not grant
+permission to use BeOpen trademarks or trade names in a trademark
+sense to endorse or promote products or services of Licensee, or any
+third party.  As an exception, the "BeOpen Python" logos available at
+http://www.pythonlabs.com/logos.html may be used according to the
+permissions granted on that web page.
+
+7. By copying, installing or otherwise using the software, Licensee
+agrees to be bound by the terms and conditions of this License
+Agreement.
+
+
+CNRI LICENSE AGREEMENT FOR PYTHON 1.6.1
+---------------------------------------
+
+1. This LICENSE AGREEMENT is between the Corporation for National
+Research Initiatives, having an office at 1895 Preston White Drive,
+Reston, VA 20191 ("CNRI"), and the Individual or Organization
+("Licensee") accessing and otherwise using Python 1.6.1 software in
+source or binary form and its associated documentation.
+
+2. Subject to the terms and conditions of this License Agreement, CNRI
+hereby grants Licensee a nonexclusive, royalty-free, world-wide
+license to reproduce, analyze, test, perform and/or display publicly,
+prepare derivative works, distribute, and otherwise use Python 1.6.1
+alone or in any derivative version, provided, however, that CNRI's
+License Agreement and CNRI's notice of copyright, i.e., "Copyright (c)
+1995-2001 Corporation for National Research Initiatives; All Rights
+Reserved" are retained in Python 1.6.1 alone or in any derivative
+version prepared by Licensee.  Alternately, in lieu of CNRI's License
+Agreement, Licensee may substitute the following text (omitting the
+quotes): "Python 1.6.1 is made available subject to the terms and
+conditions in CNRI's License Agreement.  This Agreement together with
+Python 1.6.1 may be located on the Internet using the following
+unique, persistent identifier (known as a handle): 1895.22/1013.  This
+Agreement may also be obtained from a proxy server on the Internet
+using the following URL: http://hdl.handle.net/1895.22/1013".
+
+3. In the event Licensee prepares a derivative work that is based on
+or incorporates Python 1.6.1 or any part thereof, and wants to make
+the derivative work available to others as provided herein, then
+Licensee hereby agrees to include in any such work a brief summary of
+the changes made to Python 1.6.1.
+
+4. CNRI is making Python 1.6.1 available to Licensee on an "AS IS"
+basis.  CNRI MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, CNRI MAKES NO AND
+DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS
+FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF PYTHON 1.6.1 WILL NOT
+INFRINGE ANY THIRD PARTY RIGHTS.
+
+5. CNRI SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF PYTHON
+1.6.1 FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR LOSS AS
+A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING PYTHON 1.6.1,
+OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.
+
+6. This License Agreement will automatically terminate upon a material
+breach of its terms and conditions.
+
+7. This License Agreement shall be governed by the federal
+intellectual property law of the United States, including without
+limitation the federal copyright law, and, to the extent such
+U.S. federal law does not apply, by the law of the Commonwealth of
+Virginia, excluding Virginia's conflict of law provisions.
+Notwithstanding the foregoing, with regard to derivative works based
+on Python 1.6.1 that incorporate non-separable material that was
+previously distributed under the GNU General Public License (GPL), the
+law of the Commonwealth of Virginia shall govern this License
+Agreement only as to issues arising under or with respect to
+Paragraphs 4, 5, and 7 of this License Agreement.  Nothing in this
+License Agreement shall be deemed to create any relationship of
+agency, partnership, or joint venture between CNRI and Licensee.  This
+License Agreement does not grant permission to use CNRI trademarks or
+trade name in a trademark sense to endorse or promote products or
+services of Licensee, or any third party.
+
+8. By clicking on the "ACCEPT" button where indicated, or by copying,
+installing or otherwise using Python 1.6.1, Licensee agrees to be
+bound by the terms and conditions of this License Agreement.
+
+        ACCEPT
+
+
+CWI LICENSE AGREEMENT FOR PYTHON 0.9.0 THROUGH 1.2
+--------------------------------------------------
+
+Copyright (c) 1991 - 1995, Stichting Mathematisch Centrum Amsterdam,
+The Netherlands.  All rights reserved.
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation, and that the name of Stichting Mathematisch
+Centrum or CWI not be used in advertising or publicity pertaining to
+distribution of the software without specific, written prior
+permission.
+
+STICHTING MATHEMATISCH CENTRUM DISCLAIMS ALL WARRANTIES WITH REGARD TO
+THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS, IN NO EVENT SHALL STICHTING MATHEMATISCH CENTRUM BE LIABLE
+FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
+### Unlicense
+
+Applies to 1 package: markdown-it-anchor 9.2.1.
+
+_No licence file was published with these packages._
