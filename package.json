@@ -1,12 +1,13 @@
 {
   "name": "markdown-studio",
   "private": true,
-  "version": "0.5.1",
+  "version": "0.5.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "notices": "node scripts/gen-notices.mjs",
     "tauri": "tauri"
   },
   "dependencies": {
