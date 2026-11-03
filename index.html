@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markdown Studio</title>
+  </head>
+  <body>
+    <div id="shell">
+      <div id="toolbar" class="toolbar" role="toolbar" aria-label="Formatting and view">
+        <button type="button" class="tool-btn" data-action="new" title="New document (Ctrl+N)" aria-label="New document">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 1.9h5l3.1 3.1v8.1a.9.9 0 0 1-.9.9H4a.9.9 0 0 1-.9-.9V2.8A.9.9 0 0 1 4 1.9Z" />
+            <path d="M9 1.9V5h3.1" />
+            <path d="M7.6 8.1v3.2M6 9.7h3.2" />
+          </svg>
+        </button>
+        <button type="button" class="tool-btn" data-action="open" title="Open file (Ctrl+O)" aria-label="Open file">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1.9 12.4V3.6a.9.9 0 0 1 .9-.9h3.1l1.4 1.8h4.9a.9.9 0 0 1 .9.9v1" />
+            <path d="M1.9 12.4 3.7 7.5a.9.9 0 0 1 .85-.6h8.6a.9.9 0 0 1 .85 1.2l-1.4 4.3a.9.9 0 0 1-.85.6H2.8a.9.9 0 0 1-.9-.9Z" />
+          </svg>
+        </button>
+        <button type="button" class="tool-btn" data-action="save" title="Save (Ctrl+S)" aria-label="Save">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2.9 1.9h8.3l2.9 2.9v9.3a.9.9 0 0 1-.9.9H2.9a.9.9 0 0 1-.9-.9V2.8a.9.9 0 0 1 .9-.9Z" />
+            <path d="M4.9 1.9v3.8h5.6V1.9" />
+            <path d="M4.6 8.4h6.8v6.6H4.6z" />
+          </svg>
+        </button>
+
+        <span class="tool-sep" role="separator"></span>
+
+        <button type="button" class="tool-btn" data-action="undo" title="Undo (Ctrl+Z)" aria-label="Undo">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4.4 5.2 2 7.6l2.4 2.4" />
+            <path d="M2 7.6h7.1a3.7 3.7 0 1 1 0 7.4H6.2" />
+          </svg>
+        </button>
+        <button type="button" class="tool-btn" data-action="redo" title="Redo (Ctrl+Y)" aria-label="Redo">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11.6 5.2 14 7.6l-2.4 2.4" />
+            <path d="M14 7.6H6.9a3.7 3.7 0 1 0 0 7.4h2.9" />
+          </svg>
+        </button>
+
+        <span class="tool-sep" role="separator"></span>
+
+        <button type="button" class="tool-btn" data-action="bold" title="Bold (Ctrl+B)" aria-label="Bold">
+          <span class="glyph glyph-bold" aria-hidden="true">B</span>
+        </button>
+        <button type="button" class="tool-btn" data-action="italic" title="Italic (Ctrl+I)" aria-label="Italic">
+          <span class="glyph glyph-italic" aria-hidden="true">I</span>
+        </button>
+        <button type="button" class="tool-btn" data-action="link" title="Link (Ctrl+K)" aria-label="Insert link">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6.6 9.4a2.7 2.7 0 0 0 3.8 0l2.2-2.2a2.7 2.7 0 0 0-3.8-3.8l-1.1 1.1" />
+            <path d="M9.4 6.6a2.7 2.7 0 0 0-3.8 0L3.4 8.8a2.7 2.7 0 0 0 3.8 3.8l1.1-1.1" />
+          </svg>
+        </button>
+
+        <button type="button" class="tool-btn" data-action="h1" title="Heading 1 (Ctrl+Alt+1)" aria-label="Heading 1">
+          <span class="glyph glyph-h" aria-hidden="true">H1</span>
+        </button>
+        <button type="button" class="tool-btn" data-action="h2" title="Heading 2 (Ctrl+Alt+2)" aria-label="Heading 2">
+          <span class="glyph glyph-h" aria-hidden="true">H2</span>
+        </button>
+        <button type="button" class="tool-btn" data-action="h3" title="Heading 3 (Ctrl+Alt+3)" aria-label="Heading 3">
+          <span class="glyph glyph-h" aria-hidden="true">H3</span>
+        </button>
+        <button type="button" class="tool-btn" data-action="h4" title="Heading 4 (Ctrl+Alt+4)" aria-label="Heading 4">
+          <span class="glyph glyph-h" aria-hidden="true">H4</span>
+        </button>
+        <button type="button" class="tool-btn" data-action="code-block" title="Code block (Ctrl+Alt+C)" aria-label="Code block">
+          <span class="glyph glyph-code" aria-hidden="true">&lt;/&gt;</span>
+        </button>
+        <button type="button" class="tool-btn" data-action="table" title="Insert table (Ctrl+Alt+T)" aria-label="Insert table">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2.2" y="2.9" width="11.6" height="10.2" rx="1" />
+            <path d="M2.2 6.3h11.6M6.1 6.3v6.8M10 6.3v6.8" />
+          </svg>
+        </button>
+
+        <span class="tool-sep" role="separator"></span>
+
+        <button type="button" class="tool-btn" data-action="mode-raw" data-toggle="mode" aria-pressed="false" title="Raw source only (Ctrl+1)" aria-label="Raw source">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5.4 4.3 1.9 8l3.5 3.7" />
+            <path d="M10.6 4.3 14.1 8l-3.5 3.7" />
+          </svg>
+        </button>
+        <button type="button" class="tool-btn" data-action="mode-split" data-toggle="mode" aria-pressed="true" title="Raw and preview side by side (Ctrl+2)" aria-label="Split view">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="1.9" y="2.9" width="12.2" height="10.2" rx="1.1" />
+            <path d="M8 2.9v10.2" />
+          </svg>
+        </button>
+        <button type="button" class="tool-btn" data-action="mode-preview" data-toggle="mode" aria-pressed="false" title="Preview only (Ctrl+3)" aria-label="Preview">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1.6 8S4 3.9 8 3.9 14.4 8 14.4 8 12 12.1 8 12.1 1.6 8 1.6 8Z" />
+            <circle cx="8" cy="8" r="1.9" />
+          </svg>
+        </button>
+
+        <span class="tool-sep" role="separator"></span>
+
+        <button type="button" class="tool-btn" data-action="toggle-sidebar" data-toggle="sidebar" aria-pressed="false" title="Folder sidebar (Ctrl+Shift+B)" aria-label="Toggle folder sidebar">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="1.9" y="2.9" width="12.2" height="10.2" rx="1.1" />
+            <path d="M6.3 2.9v10.2" />
+          </svg>
+        </button>
+        <button type="button" class="tool-btn" data-action="find" title="Find (Ctrl+F)" aria-label="Find">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="7" cy="7" r="3.7" />
+            <path d="m9.9 9.9 3.2 3.2" />
+          </svg>
+        </button>
+        <span class="tool-sep" role="separator"></span>
+
+        <button type="button" class="tool-btn" data-action="zoom-out" title="Smaller text (Ctrl+-)" aria-label="Zoom out">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" />
+            <path d="m10.7 10.7 3 3" />
+            <path d="M4.9 7h4.2" />
+          </svg>
+        </button>
+        <button type="button" class="tool-btn" data-action="zoom-in" title="Larger text (Ctrl+=)" aria-label="Zoom in">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" />
+            <path d="m10.7 10.7 3 3" />
+            <path d="M4.9 7h4.2M7 4.9v4.2" />
+          </svg>
+        </button>
+
+        <button type="button" class="tool-btn" data-action="print" title="Print / export PDF (Ctrl+P)" aria-label="Print">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4.6 5.6V2.9h6.8v2.7" />
+            <rect x="1.9" y="5.6" width="12.2" height="5.4" rx="1.1" />
+            <path d="M4.6 8.6h6.8v4.5H4.6z" />
+          </svg>
+        </button>
+      </div>
+
+      <div id="app">
+        <aside id="sidebar" class="sidebar" hidden aria-label="Folder">
+          <div class="sidebar-head">
+            <span id="sidebar-title" class="sidebar-title">No folder open</span>
+            <button id="sidebar-close" class="icon-btn" title="Hide folder sidebar (Ctrl+Shift+B)" aria-label="Hide folder sidebar">&times;</button>
+          </div>
+          <div id="tree" class="tree" role="tree" aria-label="Markdown files"></div>
+        </aside>
+        <div id="sidebar-resizer" class="sidebar-resizer" hidden role="separator" aria-orientation="vertical"></div>
+        <main id="main" class="main">
+          <div id="tabstrip" class="tabstrip" role="tablist"></div>
+          <nav id="breadcrumb" class="breadcrumb" aria-label="Open document path"></nav>
+          <div id="workspace" class="workspace">
+            <div id="editor-host" class="pane editor-pane"></div>
+            <div id="preview-scroll" class="pane preview-pane">
+              <article id="preview" class="markdown-body"></article>
+            </div>
+          </div>
+          <footer id="statusbar" class="statusbar">
+            <span id="stat-file" class="stat stat-file"></span>
+            <span class="stat-spacer"></span>
+            <span id="stat-cursor" class="stat"></span>
+            <span id="stat-words" class="stat"></span>
+            <span id="stat-eol" class="stat" title="Line endings">LF</span>
+            <span id="stat-enc" class="stat" title="Encoding">UTF-8</span>
+            <span id="stat-mode" class="stat" title="View mode">Split</span>
+          </footer>
+        </main>
+      </div>
+    </div>
+    <div id="drop-overlay" class="drop-overlay" hidden>
+      <div class="drop-card">Drop a Markdown file to open</div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
