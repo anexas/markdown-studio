@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markdown Studio — a fast Markdown editor for Windows</title>
+    <meta
+      name="description"
+      content="A lightweight Markdown editor for Windows 11. Raw source on one side, rendered HTML on the other, in a 3 MB installer built with Tauri 2."
+    />
+    <link rel="canonical" href="https://markdownstudio.saxenas.uk/" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Markdown Studio — a fast Markdown editor for Windows" />
+    <meta
+      property="og:description"
+      content="Raw source on one side, rendered HTML on the other. Native Windows shell, 3 MB installer, MIT licensed."
+    />
+    <meta property="og:url" content="https://markdownstudio.saxenas.uk/" />
+    <meta name="twitter:card" content="summary" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3.5' fill='%230969da'/%3E%3Cpath d='M3.6 11.4V4.9l1.9 2.4 1.9-2.4v6.5' fill='none' stroke='%23fff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M11.2 4.9v6.5M9.4 9.6l1.8 1.8 1.8-1.8' fill='none' stroke='%23fff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --bg-chrome: #f3f3f3;
+        --bg-elevated: #fafafa;
+        --fg: #1f2328;
+        --fg-muted: #59636e;
+        --border: #d8dee4;
+        --accent: #0969da;
+        --accent-soft: rgba(9, 105, 218, 0.12);
+        --hover: rgba(0, 0, 0, 0.05);
+        --shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        --font-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+        --font-mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
+        --max: 1040px;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0d1117;
+          --bg-chrome: #1b1f24;
+          --bg-elevated: #161b22;
+          --fg: #e6edf3;
+          --fg-muted: #9198a1;
+          --border: #30363d;
+          --accent: #4493f8;
+          --accent-soft: rgba(68, 147, 248, 0.16);
+          --hover: rgba(255, 255, 255, 0.06);
+          --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-ui);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .wrap {
+        width: 100%;
+        max-width: var(--max);
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* ------------------------------------------------------------------- header */
+
+      .site-head {
+        border-bottom: 1px solid var(--border);
+        background: var(--bg-elevated);
+      }
+
+      .site-head .wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 60px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--fg);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .brand:hover {
+        text-decoration: none;
+      }
+
+      .brand svg {
+        width: 22px;
+        height: 22px;
+        flex: 0 0 auto;
+      }
+
+      .site-nav {
+        display: flex;
+        gap: 20px;
+        font-size: 14px;
+      }
+
+      .site-nav a {
+        color: var(--fg-muted);
+      }
+
+      .site-nav a:hover {
+        color: var(--fg);
+        text-decoration: none;
+      }
+
+      /* --------------------------------------------------------------------- hero */
+
+      .hero {
+        padding: 72px 0 40px;
+      }
+
+      .hero h1 {
+        margin: 0 0 16px;
+        font-size: clamp(32px, 5vw, 48px);
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        font-weight: 650;
+      }
+
+      .hero p.lede {
+        margin: 0 0 28px;
+        max-width: 62ch;
+        font-size: 18px;
+        color: var(--fg-muted);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 20px;
+        border-radius: 7px;
+        border: 1px solid transparent;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .btn:hover {
+        text-decoration: none;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #ffffff;
+        border-color: var(--accent);
+      }
+
+      .btn-primary:hover {
+        filter: brightness(1.08);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: var(--fg);
+        border-color: var(--border);
+      }
+
+      .btn-secondary:hover {
+        background: var(--hover);
+      }
+
+      .meta {
+        margin-top: 18px;
+        font-size: 14px;
+        color: var(--fg-muted);
+      }
+
+      .meta span + span::before {
+        content: "·";
+        margin: 0 8px;
+        color: var(--border);
+      }
+
+      /* -------------------------------------------------------------- window mock */
+
+      .window {
+        margin: 44px 0 0;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        background: var(--bg);
+      }
+
+      .window-bar {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 12px;
+        background: var(--bg-chrome);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--border);
+      }
+
+      .window-title {
+        margin-left: 8px;
+        font-size: 12px;
+        color: var(--fg-muted);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 2px;
+        padding: 6px 8px 0;
+        background: var(--bg-chrome);
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+      }
+
+      .tab {
+        padding: 5px 12px;
+        border: 1px solid transparent;
+        border-bottom: none;
+        border-radius: 6px 6px 0 0;
+        color: var(--fg-muted);
+      }
+
+      .tab.active {
+        background: var(--bg);
+        border-color: var(--border);
+        color: var(--fg);
+        margin-bottom: -1px;
+      }
+
+      .panes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        min-height: 300px;
+      }
+
+      .pane {
+        padding: 18px 20px;
+        font-size: 13.5px;
+        line-height: 1.65;
+        overflow: hidden;
+      }
+
+      .pane + .pane {
+        border-left: 1px solid var(--border);
+      }
+
+      .pane pre {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+        line-height: 1.7;
+        color: var(--fg-muted);
+        white-space: pre-wrap;
+      }
+
+      .pane pre b {
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .pane h3 {
+        margin: 0 0 10px;
+        font-size: 20px;
+        letter-spacing: -0.01em;
+      }
+
+      .pane p {
+        margin: 0 0 12px;
+      }
+
+      .pane ul {
+        margin: 0 0 12px;
+        padding-left: 20px;
+      }
+
+      .status {
+        display: flex;
+        gap: 16px;
+        padding: 7px 14px;
+        border-top: 1px solid var(--border);
+        background: var(--bg-chrome);
+        font-size: 12px;
+        color: var(--fg-muted);
+      }
+
+      /* ----------------------------------------------------------------- sections */
+
+      section h2 {
+        margin: 0 0 6px;
+        font-size: 24px;
+        letter-spacing: -0.01em;
+      }
+
+      section p.section-lede {
+        margin: 0 0 28px;
+        color: var(--fg-muted);
+      }
+
+      .features {
+        padding: 56px 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+
+      .card {
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--bg-elevated);
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 15px;
+        font-weight: 650;
+      }
+
+      .card p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--fg-muted);
+      }
+
+      .shortcuts {
+        padding: 56px 0;
+        border-top: 1px solid var(--border);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+
+      th {
+        font-weight: 600;
+        color: var(--fg-muted);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      td:first-child {
+        color: var(--fg-muted);
+        width: 46%;
+        padding-right: 20px;
+      }
+
+      kbd {
+        display: inline-block;
+        padding: 1px 6px;
+        border: 1px solid var(--border);
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        background: var(--bg-chrome);
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+        color: var(--fg);
+        white-space: nowrap;
+      }
+
+      .install {
+        padding: 56px 0 72px;
+        border-top: 1px solid var(--border);
+      }
+
+      .install-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+
+      .install .card p + p {
+        margin-top: 10px;
+      }
+
+      /* ------------------------------------------------------------------- footer */
+
+      .site-foot {
+        border-top: 1px solid var(--border);
+        background: var(--bg-elevated);
+        padding: 28px 0;
+        font-size: 13.5px;
+        color: var(--fg-muted);
+      }
+
+      .site-foot .wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 24px;
+        justify-content: space-between;
+      }
+
+      .site-foot a {
+        color: var(--fg-muted);
+      }
+
+      .site-foot a:hover {
+        color: var(--fg);
+      }
+
+      .foot-links {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      /* ---------------------------------------------------------------- responsive */
+
+      @media (max-width: 860px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .install-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .hero {
+          padding: 44px 0 24px;
+        }
+
+        .panes {
+          grid-template-columns: 1fr;
+        }
+
+        .pane + .pane {
+          border-left: none;
+          border-top: 1px solid var(--border);
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .site-nav {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-head">
+      <div class="wrap">
+        <a class="brand" href="#top">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <rect width="16" height="16" rx="3.5" fill="currentColor" opacity="0.12" />
+            <path
+              d="M3.6 11.4V4.9l1.9 2.4 1.9-2.4v6.5M11.2 4.9v6.5M9.4 9.6l1.8 1.8 1.8-1.8"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Markdown Studio
+        </a>
+        <nav class="site-nav">
+          <a href="#features">Features</a>
+          <a href="#shortcuts">Shortcuts</a>
+          <a href="#install">Install</a>
+          <a href="https://github.com/anexas/markdown-studio">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <div class="wrap">
+        <div class="hero">
+          <h1>Markdown, side by side.</h1>
+          <p class="lede">
+            A lightweight Markdown editor for Windows 11: raw source on one side, rendered HTML on the
+            other, in a native shell that opens instantly. No Electron, no bundled browser, no account.
+          </p>
+          <div class="actions">
+            <a
+              class="btn btn-primary"
+              href="https://github.com/anexas/markdown-studio/releases/latest/download/Markdown-Studio-x64.msi"
+            >
+              Download for Windows
+            </a>
+            <a class="btn btn-secondary" href="https://github.com/anexas/markdown-studio">
+              View the source
+            </a>
+          </div>
+          <p class="meta">
+            <span>Windows 10 and 11, 64-bit</span><span>3 MB installer</span><span>MIT licensed</span>
+          </p>
+
+          <div class="window" aria-hidden="true">
+            <div class="window-bar">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="window-title">Markdown Studio</span>
+            </div>
+            <div class="tabs">
+              <span class="tab active">README.md</span>
+              <span class="tab">notes.md</span>
+            </div>
+            <div class="panes">
+              <div class="pane">
+                <pre><b>#</b> Markdown Studio
+
+A **lightweight** editor for Windows.
+
+- Raw, split and preview
+- GFM tables and task lists
+- Session restore on relaunch
+
+```js
+const editor = createEditor();
+```</pre>
+              </div>
+              <div class="pane">
+                <h3>Markdown Studio</h3>
+                <p>A <strong>lightweight</strong> editor for Windows.</p>
+                <ul>
+                  <li>Raw, split and preview</li>
+                  <li>GFM tables and task lists</li>
+                  <li>Session restore on relaunch</li>
+                </ul>
+                <pre>const editor = createEditor();</pre>
+              </div>
+            </div>
+            <div class="status">
+              <span>UTF-8</span><span>LF</span><span>Split</span><span>100%</span>
+            </div>
+          </div>
+        </div>
+
+        <section class="features" id="features">
+          <h2>Built for writing, not configuring</h2>
+          <p class="section-lede">
+            Everything you need to write and read Markdown, and deliberately nothing else.
+          </p>
+          <div class="grid">
+            <div class="card">
+              <h3>Three view modes</h3>
+              <p>
+                Raw source with CodeMirror 6 highlighting, split view with synchronised scrolling, or
+                a clean preview. <kbd>Ctrl+E</kbd> cycles them.
+              </p>
+            </div>
+            <div class="card">
+              <h3>GFM rendering</h3>
+              <p>
+                Tables, task lists, footnotes, heading anchors and fenced code with language
+                highlighting, rendered as you type.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Tabs that remember</h3>
+              <p>
+                Dirty markers, middle-click close, and your whole session restored on relaunch.
+                <kbd>Ctrl+N</kbd> reuses an untouched empty tab instead of stacking blanks.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Folder sidebar</h3>
+              <p>
+                A read-only tree of Markdown files that follows the document you are editing, with a
+                breadcrumb bar that opens any folder above it.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Native Windows shell</h3>
+              <p>
+                A real Win32 menu bar with accelerators, native file dialogs, drag-and-drop, single
+                instance and remembered window geometry.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Text zoom, print, export</h3>
+              <p>
+                Zoom the text from 60 % to 240 % without the chrome reflowing, and print straight to
+                PDF with a print stylesheet.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="shortcuts" id="shortcuts">
+          <h2>The ones you will actually use</h2>
+          <p class="section-lede">Every command also exists in the menu and on the ribbon.</p>
+          <table>
+            <tbody>
+              <tr>
+                <th scope="row">Cycle view · Raw · Split · Preview</th>
+                <td>
+                  <kbd>Ctrl+E</kbd> <kbd>Ctrl+1</kbd> <kbd>Ctrl+2</kbd> <kbd>Ctrl+3</kbd>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">New · Open · Open folder</th>
+                <td><kbd>Ctrl+N</kbd> <kbd>Ctrl+O</kbd> <kbd>Ctrl+Shift+O</kbd></td>
+              </tr>
+              <tr>
+                <th scope="row">Save · Save as · Print</th>
+                <td><kbd>Ctrl+S</kbd> <kbd>Ctrl+Shift+S</kbd> <kbd>Ctrl+P</kbd></td>
+              </tr>
+              <tr>
+                <th scope="row">Bold · Italic · Link</th>
+                <td><kbd>Ctrl+B</kbd> <kbd>Ctrl+I</kbd> <kbd>Ctrl+K</kbd></td>
+              </tr>
+              <tr>
+                <th scope="row">Heading 1 to 4 · Code block · Table</th>
+                <td>
+                  <kbd>Ctrl+Alt+1</kbd> … <kbd>Ctrl+Alt+4</kbd> <kbd>Ctrl+Alt+C</kbd>
+                  <kbd>Ctrl+Alt+T</kbd>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Zoom in · out · reset</th>
+                <td><kbd>Ctrl+=</kbd> <kbd>Ctrl+-</kbd> <kbd>Ctrl+0</kbd></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="install" id="install">
+          <h2>Installing</h2>
+          <p class="section-lede">Download the MSI, run it, and Markdown Studio takes over as the handler for Markdown files.</p>
+          <div class="install-grid">
+            <div class="card">
+              <h3>What the installer does</h3>
+              <p>
+                Installs per-machine into <code>Program Files</code>, so it asks for elevation once.
+                It registers <code>.md</code>, <code>.markdown</code>, <code>.mdown</code> and
+                <code>.mkd</code>, adds an entry to Add or remove programs, and ships its full
+                third-party notices alongside the executable.
+              </p>
+              <p>Windows 10 or 11 on x64. WebView2 is preinstalled on Windows 11 and already present on nearly every Windows 10 machine.</p>
+            </div>
+            <div class="card">
+              <h3>How it treats your files</h3>
+              <p>
+                Markdown is treated as untrusted input: rendered HTML is sanitised with DOMPurify
+                under a strict content security policy, and remote images are blocked rather than
+                silently fetched.
+              </p>
+              <p>
+                Saves are atomic — written to a temporary file, flushed, then renamed over the target
+                — and files keep the BOM state and line endings they were opened with.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-foot">
+      <div class="wrap">
+        <span>Markdown Studio — MIT licensed. Built with Tauri 2, CodeMirror 6 and markdown-it.</span>
+        <span class="foot-links">
+          <a href="https://github.com/anexas/markdown-studio">GitHub</a>
+          <a href="https://github.com/anexas/markdown-studio/blob/main/THIRD-PARTY-NOTICES.md">Third-party notices</a>
+          <a href="https://freebuff.com">Built with Freebuff</a>
+        </span>
+      </div>
+    </footer>
+  </body>
+</html>
