@@ -3,6 +3,7 @@ dist/
 src-tauri/target/
 src-tauri/gen/
 .freebuff/
+releases/
 *.log
 .DS_Store
 Thumbs.db
