@@ -2,6 +2,9 @@ import type { EditorState } from "@codemirror/state";
 
 export type ViewMode = "raw" | "split" | "preview";
 
+/** What the right pane shows while the view is Split. */
+export type PaneView = "rendered" | "preview";
+
 /** A single open buffer. Unsaved documents have `path === null`. */
 export interface Doc {
   id: string;

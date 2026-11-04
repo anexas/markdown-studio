@@ -12,6 +12,27 @@ function joinPath(dir: string, name: string): string {
   return dir.endsWith("\\") || dir.endsWith("/") ? `${dir}${name}` : `${dir}\\${name}`;
 }
 
+/**
+ * Parent directory of a Windows path, or null when there is nothing above it: a drive
+ * root (`C:\`) and a network share root (`\\server\share`) are both terminal, because
+ * listing anything above them is either pointless or very slow.
+ */
+export function parentDir(path: string): string | null {
+  const norm = path.replace(/\//g, "\\").replace(/\\+$/, "");
+  if (!norm) return null;
+
+  const parts = norm.split("\\").filter(Boolean);
+
+  if (norm.startsWith("\\\\")) {
+    if (parts.length <= 2) return null;
+    return `\\\\${parts.slice(0, -1).join("\\")}`;
+  }
+
+  if (!/^[A-Za-z]:$/.test(parts[0] ?? "")) return null;
+  if (parts.length <= 1) return null;
+  return parts.length === 2 ? `${parts[0]}\\` : `${parts[0]}\\${parts.slice(1, -1).join("\\")}`;
+}
+
 export function isUnderRoot(root: string, path: string): boolean {
   const base = normPath(root);
   const target = normPath(path);
@@ -23,14 +44,25 @@ export class Sidebar {
   private root: string | null = null;
   private activePath: string | null = null;
   private revealToken = 0;
+  /** Incremented by every open(); a listing from an older token must not be appended. */
+  private loadToken = 0;
+  /** In-flight child loads, so two reveals reaching one folder share a single request. */
+  private readonly pendingLoads = new WeakMap<HTMLElement, Promise<void>>();
   private readonly tree: HTMLElement;
   private readonly title: HTMLElement;
   private readonly onOpen: (path: string) => void;
+  private readonly onUp: (dir: string) => void;
 
-  constructor(tree: HTMLElement, title: HTMLElement, onOpen: (path: string) => void) {
+  constructor(
+    tree: HTMLElement,
+    title: HTMLElement,
+    onOpen: (path: string) => void,
+    onUp: (dir: string) => void,
+  ) {
     this.tree = tree;
     this.title = title;
     this.onOpen = onOpen;
+    this.onUp = onUp;
   }
 
   getRoot(): string | null {
@@ -38,12 +70,15 @@ export class Sidebar {
   }
 
   async open(root: string): Promise<void> {
+    const token = ++this.loadToken;
     this.revealToken += 1;
     this.root = root;
     this.title.textContent = root;
     this.title.title = root;
     this.tree.replaceChildren();
-    await this.loadInto(this.tree, root, 0);
+    const parent = parentDir(root);
+    if (parent) this.tree.append(this.makeUpRow(parent));
+    await this.loadInto(this.tree, root, 0, token);
   }
 
   async reload(): Promise<void> {
@@ -130,8 +165,20 @@ export class Sidebar {
     if (!children.dataset.loaded) {
       const depth = Number(wrap.dataset.depth ?? "0");
       if (depth + 1 > MAX_DEPTH) return;
-      await this.loadInto(children, wrap.dataset.path ?? "", depth + 1);
-      children.dataset.loaded = "1";
+
+      // Two reveals routinely reach the same folder at once: startup restores several
+      // tabs and each activation reveals without awaiting. Share the in-flight load
+      // instead of starting a second one, which appended every child twice.
+      const token = this.loadToken;
+      let pending = this.pendingLoads.get(children);
+      if (!pending) {
+        pending = this.loadInto(children, wrap.dataset.path ?? "", depth + 1, token).finally(() => {
+          this.pendingLoads.delete(children);
+        });
+        this.pendingLoads.set(children, pending);
+      }
+      await pending;
+      if (token === this.loadToken) children.dataset.loaded = "1";
     }
 
     children.hidden = false;
@@ -153,13 +200,18 @@ export class Sidebar {
     if (twisty) twisty.textContent = "\u25B8";
   }
 
-  private async loadInto(host: HTMLElement, dir: string, depth: number): Promise<void> {
+  private async loadInto(host: HTMLElement, dir: string, depth: number, token: number): Promise<void> {
     let entries: TreeEntry[] = [];
     try {
       entries = await invoke<TreeEntry[]>("list_folder", { path: dir });
     } catch {
       entries = [];
     }
+
+    // A newer open() owns the tree now; appending this listing would splice two folders
+    // into one another.
+    if (token !== this.loadToken) return;
+
     if (entries.length === 0) {
       const empty = document.createElement("div");
       empty.className = "tree-empty";
@@ -169,8 +221,38 @@ export class Sidebar {
       return;
     }
     for (const entry of entries) {
+      if (token !== this.loadToken) return;
       host.append(entry.isDir ? this.makeDir(entry, depth) : this.makeFile(entry, depth));
     }
+  }
+
+  /** The `..` row: re-roots the tree one level up, where the folder permits it. */
+  private makeUpRow(parent: string): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "tree-row up";
+    row.style.paddingLeft = "8px";
+    row.setAttribute("role", "treeitem");
+    row.tabIndex = 0;
+    row.title = `Go up to ${parent}`;
+
+    const glyph = document.createElement("span");
+    glyph.className = "twisty";
+    glyph.textContent = "\u2191";
+
+    const label = document.createElement("span");
+    label.className = "label";
+    label.textContent = "..";
+
+    const activate = (): void => this.onUp(parent);
+    row.append(glyph, label);
+    row.addEventListener("click", activate);
+    row.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
+      }
+    });
+    return row;
   }
 
   private makeDir(entry: TreeEntry, depth: number): HTMLElement {

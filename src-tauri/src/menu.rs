@@ -11,6 +11,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let save_as = MenuItem::with_id(app, "save-as", "Save &As...", true, Some("CmdOrCtrl+Shift+S"))?;
     let close = MenuItem::with_id(app, "close", "&Close Tab", true, Some("CmdOrCtrl+W"))?;
     let print = MenuItem::with_id(app, "print", "&Print / Export PDF...", true, Some("CmdOrCtrl+P"))?;
+    let preferences = MenuItem::with_id(app, "preferences", "&Preferences...", true, Some("CmdOrCtrl+,"))?;
     let exit = MenuItem::with_id(app, "exit", "E&xit", true, None::<&str>)?;
 
     let file = Submenu::new(app, "&File", true)?;
@@ -24,6 +25,8 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     file.append(&close)?;
     file.append(&print)?;
     file.append(&PredefinedMenuItem::separator(app)?)?;
+    file.append(&preferences)?;
+    file.append(&PredefinedMenuItem::separator(app)?)?;
     file.append(&exit)?;
 
     let find = MenuItem::with_id(app, "find", "&Find...", true, Some("CmdOrCtrl+F"))?;
@@ -36,6 +39,13 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let h4 = MenuItem::with_id(app, "h4", "Heading &4", true, Some("CmdOrCtrl+Alt+4"))?;
     let code_block = MenuItem::with_id(app, "code-block", "&Code block", true, Some("CmdOrCtrl+Alt+C"))?;
     let table = MenuItem::with_id(app, "table", "&Table", true, Some("CmdOrCtrl+Alt+T"))?;
+    let bullet_list = MenuItem::with_id(app, "bullet-list", "&Bulleted list", true, Some("CmdOrCtrl+Shift+L"))?;
+    let ordered_list = MenuItem::with_id(app, "ordered-list", "&Numbered list", true, Some("CmdOrCtrl+Shift+N"))?;
+    let task_list = MenuItem::with_id(app, "task-list", "&Task list", true, Some("CmdOrCtrl+Shift+T"))?;
+    let blockquote = MenuItem::with_id(app, "blockquote", "&Blockquote", true, Some("CmdOrCtrl+Shift+Q"))?;
+    let inline_code = MenuItem::with_id(app, "inline-code", "In&line code", true, Some("CmdOrCtrl+Shift+C"))?;
+    let strike = MenuItem::with_id(app, "strikethrough", "&Strikethrough", true, Some("CmdOrCtrl+Shift+X"))?;
+    let rule = MenuItem::with_id(app, "horizontal-rule", "&Horizontal rule", true, None::<&str>)?;
 
     let edit = Submenu::new(app, "&Edit", true)?;
     edit.append(&PredefinedMenuItem::undo(app, None)?)?;
@@ -59,10 +69,27 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     edit.append(&PredefinedMenuItem::separator(app)?)?;
     edit.append(&code_block)?;
     edit.append(&table)?;
+    edit.append(&PredefinedMenuItem::separator(app)?)?;
+    edit.append(&bullet_list)?;
+    edit.append(&ordered_list)?;
+    edit.append(&task_list)?;
+    edit.append(&PredefinedMenuItem::separator(app)?)?;
+    edit.append(&blockquote)?;
+    edit.append(&inline_code)?;
+    edit.append(&strike)?;
+    edit.append(&PredefinedMenuItem::separator(app)?)?;
+    edit.append(&rule)?;
 
     let raw = MenuItem::with_id(app, "mode-raw", "&Raw", true, Some("CmdOrCtrl+1"))?;
     let split = MenuItem::with_id(app, "mode-split", "&Split", true, Some("CmdOrCtrl+2"))?;
     let preview = MenuItem::with_id(app, "mode-preview", "&Preview", true, Some("CmdOrCtrl+3"))?;
+    let pane_toggle = MenuItem::with_id(
+        app,
+        "toggle-pane-view",
+        "Preview in rendered pane",
+        true,
+        Some("CmdOrCtrl+Alt+P"),
+    )?;
     let cycle = MenuItem::with_id(app, "mode-cycle", "Cycle view mode", true, Some("CmdOrCtrl+E"))?;
     let toggle_sidebar = MenuItem::with_id(app, "toggle-sidebar", "Folder &sidebar", true, Some("CmdOrCtrl+Shift+B"))?;
     let reload_folders = MenuItem::with_id(app, "reload-folders", "&Reload folder tree", true, Some("CmdOrCtrl+Shift+F5"))?;
@@ -74,6 +101,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     view.append(&raw)?;
     view.append(&split)?;
     view.append(&preview)?;
+    view.append(&pane_toggle)?;
     view.append(&PredefinedMenuItem::separator(app)?)?;
     view.append(&cycle)?;
     view.append(&PredefinedMenuItem::separator(app)?)?;

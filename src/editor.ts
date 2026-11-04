@@ -173,6 +173,182 @@ export function insertTable(view: EditorView): void {
   insertSnippet(view, text, 2, 2 + head.length);
 }
 
+interface LineEdit {
+  from: number;
+  to: number;
+  insert: string;
+}
+
+/** Lines touched by the selection. Blank filler lines are skipped unless they are all you selected. */
+function selectedLines(state: EditorState): Array<{ from: number; to: number; text: string }> {
+  const { from, to } = state.selection.main;
+  const first = state.doc.lineAt(from).number;
+  const last = state.doc.lineAt(to).number;
+  const lines: Array<{ from: number; to: number; text: string }> = [];
+
+  for (let number = first; number <= last; number += 1) {
+    const line = state.doc.line(number);
+    if (line.text.trim() === "" && first !== last) continue;
+    lines.push({ from: line.from, to: line.to, text: line.text });
+  }
+  return lines;
+}
+
+function indentLength(text: string): number {
+  return text.length - text.trimStart().length;
+}
+
+/** Marker length of any list line, counting leading whitespace, or 0 when there is none. */
+const LIST_MARKER = /^(\s*)(?:[-*+]\s+(?:\[[ xX]\]\s+)?|\d+[.)]\s+)/;
+
+function markerLength(text: string): number {
+  const match = LIST_MARKER.exec(text);
+  return match ? match[0].length : 0;
+}
+
+/**
+ * Applies per-line edits and keeps the selection in place. CodeMirror maps an insertion
+ * made exactly at the caret to the position *before* the inserted text, which parked the
+ * caret at the start of the line; the delta walk below restores the intended offset.
+ */
+function applyLineEdits(view: EditorView, edits: LineEdit[]): void {
+  if (edits.length === 0) return;
+  const { from, to } = view.state.selection.main;
+
+  const mapPos = (pos: number): number => {
+    let shift = 0;
+    for (const edit of edits) {
+      if (pos >= edit.to) shift += edit.insert.length - (edit.to - edit.from);
+      else if (pos > edit.from) return shift + edit.from + edit.insert.length;
+    }
+    return pos + shift;
+  };
+
+  view.dispatch({ changes: edits, selection: { anchor: mapPos(from), head: mapPos(to) } });
+  view.focus();
+}
+
+/**
+ * Shared list toggle: markers are added to every touched line, or stripped when they are
+ * all already that kind of list. Converting between list types replaces the existing
+ * marker instead of stacking one on top of another.
+ */
+function toggleList(
+  view: EditorView,
+  marked: RegExp,
+  markerFor: (index: number) => string,
+  keep?: (text: string) => boolean,
+): void {
+  const lines = selectedLines(view.state).filter((line) => !keep?.(line.text));
+  if (lines.length === 0) return;
+
+  const remove = lines.every((line) => marked.test(line.text));
+  const edits: LineEdit[] = [];
+
+  lines.forEach((line, index) => {
+    const indent = indentLength(line.text);
+    const existing = markerLength(line.text);
+    const start = line.from + indent;
+
+    if (remove) {
+      if (existing > 0) edits.push({ from: start, to: line.from + existing, insert: "" });
+      return;
+    }
+    edits.push({ from: start, to: existing > 0 ? line.from + existing : start, insert: markerFor(index) });
+  });
+
+  applyLineEdits(view, edits);
+}
+
+const TASK_ITEM = /^(\s*)[-*+][ \t]+\[[ xX]\][ \t]+/;
+
+export function toggleBulletList(view: EditorView): void {
+  // A task item is already a bullet with a checkbox. Converting it here would delete
+  // every checked state in one keystroke, so tasks are left exactly as they are.
+  toggleList(view, /^(\s*)[-*+][ \t]+(?!\[[ xX]\])/, () => "- ", (text) => TASK_ITEM.test(text));
+}
+
+export function toggleOrderedList(view: EditorView): void {
+  toggleList(view, /^(\s*)\d+[.)]\s+/, (index) => `${index + 1}. `);
+}
+
+export function toggleTaskList(view: EditorView): void {
+  toggleList(view, TASK_ITEM, () => "- [ ] ");
+}
+
+const QUOTE_PREFIX = /^(\s*)>\s?/;
+
+export function toggleBlockquote(view: EditorView): void {
+  const lines = selectedLines(view.state);
+  if (lines.length === 0) return;
+
+  const remove = lines.every((line) => QUOTE_PREFIX.test(line.text));
+  const edits: LineEdit[] = [];
+
+  for (const line of lines) {
+    const indent = indentLength(line.text);
+    const start = line.from + indent;
+    const match = QUOTE_PREFIX.exec(line.text);
+
+    if (remove) {
+      if (match) edits.push({ from: start, to: line.from + match[0].length, insert: "" });
+      continue;
+    }
+    edits.push({ from: start, to: start, insert: "> " });
+  }
+
+  applyLineEdits(view, edits);
+}
+
+/** Inline token toggle shared by inline code and strikethrough. */
+function toggleWrapSymbol(view: EditorView, token: string, placeholder: string): void {
+  const { from, to } = view.state.selection.main;
+  const doc = view.state.doc;
+  const selected = doc.sliceString(from, to);
+
+  // Selection includes the delimiters: unwrap in place.
+  if (selected.length >= token.length * 2 && selected.startsWith(token) && selected.endsWith(token)) {
+    const inner = selected.slice(token.length, selected.length - token.length);
+    view.dispatch({ changes: { from, to, insert: inner }, selection: { anchor: from, head: from + inner.length } });
+    view.focus();
+    return;
+  }
+
+  // Delimiters sit just outside the selection: remove them and keep the text selected.
+  const before = doc.sliceString(Math.max(0, from - token.length), from);
+  const after = doc.sliceString(to, Math.min(doc.length, to + token.length));
+  if (before === token && after === token) {
+    view.dispatch({
+      changes: [
+        { from: from - token.length, to: from, insert: "" },
+        { from: to, to: to + token.length, insert: "" },
+      ],
+      selection: { anchor: from - token.length, head: to - token.length },
+    });
+    view.focus();
+    return;
+  }
+
+  const body = selected || placeholder;
+  view.dispatch({
+    changes: { from, to, insert: `${token}${body}${token}` },
+    selection: { anchor: from + token.length, head: from + token.length + body.length },
+  });
+  view.focus();
+}
+
+export function toggleInlineCode(view: EditorView): void {
+  toggleWrapSymbol(view, "`", "code");
+}
+
+export function toggleStrikethrough(view: EditorView): void {
+  toggleWrapSymbol(view, "~~", "text");
+}
+
+export function insertHorizontalRule(view: EditorView): void {
+  insertSnippet(view, "---", 3, 3);
+}
+
 export function insertText(view: EditorView, text: string, cursorOffset = text.length): void {
   const { from, to } = view.state.selection.main;
   view.dispatch({

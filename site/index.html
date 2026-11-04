@@ -6,7 +6,7 @@
     <title>Markdown Studio — a fast Markdown editor for Windows</title>
     <meta
       name="description"
-      content="A lightweight Markdown editor for Windows 11. Raw source on one side, rendered HTML on the other, in a 3 MB installer built with Tauri 2."
+      content="A lightweight Markdown editor for Windows 11. Raw source on one side, a rendered pane you can type into on the other, in a 3 MB installer built with Tauri 2."
     />
     <link rel="canonical" href="https://markdownstudio.saxenas.uk/" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
@@ -15,7 +15,7 @@
     <meta property="og:title" content="Markdown Studio — a fast Markdown editor for Windows" />
     <meta
       property="og:description"
-      content="Raw source on one side, rendered HTML on the other. Native Windows shell, 3 MB installer, MIT licensed."
+      content="Raw source on one side, a pane you can edit as rendered text on the other. Native Windows shell, 3 MB installer, MIT licensed."
     />
     <meta property="og:url" content="https://markdownstudio.saxenas.uk/" />
     <meta name="twitter:card" content="summary" />
@@ -299,6 +299,25 @@
         font-weight: 600;
       }
 
+      .pane-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 0 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+        font-size: 10px;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--fg-muted);
+      }
+
+      .pane-head svg {
+        width: 12px;
+        height: 12px;
+      }
+
       .pane h3 {
         margin: 0 0 10px;
         font-size: 20px;
@@ -526,8 +545,9 @@
         <div class="hero">
           <h1>Markdown, side by side.</h1>
           <p class="lede">
-            A lightweight Markdown editor for Windows 11: raw source on one side, rendered HTML on the
-            other, in a native shell that opens instantly. No Electron, no bundled browser, no account.
+            A lightweight Markdown editor for Windows 11: raw source on one side, a rendered pane you
+            can type into on the other, in a native shell that opens instantly. No Electron, no bundled
+            browser, no account.
           </p>
           <div class="actions">
             <a
@@ -570,6 +590,13 @@ const editor = createEditor();
 ```</pre>
               </div>
               <div class="pane">
+                <div class="pane-head">
+                  <span>Rendered · editable</span>
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M10.8 2.4 13.6 5.2 6.2 12.6 2.9 13.1 3.4 9.8Z" />
+                    <path d="M9.5 3.7 12.3 6.5" />
+                  </svg>
+                </div>
                 <h3>Markdown Studio</h3>
                 <p>A <strong>lightweight</strong> editor for Windows.</p>
                 <ul>
@@ -600,10 +627,27 @@ const editor = createEditor();
               </p>
             </div>
             <div class="card">
+              <h3>An editable rendered pane</h3>
+              <p>
+                The right side of Split is not a picture: type in it. <kbd>Enter</kbd> continues a
+                list, <kbd>Tab</kbd> nests it, <kbd>Ctrl+B</kbd> and <kbd>Ctrl+I</kbd> toggle bold and
+                italic, and task boxes are clickable. Tables and raw HTML stay byte-for-byte as raw
+                blocks, and <kbd>Ctrl+Alt+P</kbd> flips the pane to a faithful read-only preview.
+              </p>
+            </div>
+            <div class="card">
               <h3>GFM rendering</h3>
               <p>
                 Tables, task lists, footnotes, heading anchors and fenced code with language
                 highlighting, rendered as you type.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Untrusted input, by default</h3>
+              <p>
+                Rendered HTML is sanitised with DOMPurify under a strict content security policy,
+                remote images are blocked instead of fetched, and saves are atomic — temp file,
+                flush, rename.
               </p>
             </div>
             <div class="card">
@@ -634,6 +678,13 @@ const editor = createEditor();
                 PDF with a print stylesheet.
               </p>
             </div>
+            <div class="card">
+              <h3>No account, nothing uploaded</h3>
+              <p>
+                No telemetry, no sign-in, no sync. Files are read and written locally by a handful of
+                Rust commands that validate extension, size and path first.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -647,6 +698,10 @@ const editor = createEditor();
                 <td>
                   <kbd>Ctrl+E</kbd> <kbd>Ctrl+1</kbd> <kbd>Ctrl+2</kbd> <kbd>Ctrl+3</kbd>
                 </td>
+              </tr>
+              <tr>
+                <th scope="row">Rendered pane · edit or read-only</th>
+                <td><kbd>Ctrl+Alt+P</kbd></td>
               </tr>
               <tr>
                 <th scope="row">New · Open · Open folder</th>

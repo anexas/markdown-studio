@@ -83,19 +83,55 @@
 
         <span class="tool-sep" role="separator"></span>
 
+        <button type="button" class="tool-btn" data-action="bullet-list" title="Bulleted list (Ctrl+Shift+L)" aria-label="Bulleted list">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true">
+            <path d="M6.3 4.2h8M6.3 8h8M6.3 11.8h8" />
+            <circle cx="3.1" cy="4.2" r="1.05" fill="currentColor" stroke="none" />
+            <circle cx="3.1" cy="8" r="1.05" fill="currentColor" stroke="none" />
+            <circle cx="3.1" cy="11.8" r="1.05" fill="currentColor" stroke="none" />
+          </svg>
+        </button>
+        <button type="button" class="tool-btn" data-action="ordered-list" title="Numbered list (Ctrl+Shift+N)" aria-label="Numbered list">
+          <span class="glyph glyph-ol" aria-hidden="true">1.</span>
+        </button>
+        <button type="button" class="tool-btn" data-action="task-list" title="Task list (Ctrl+Shift+T)" aria-label="Task list">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="1.9" y="3.2" width="3.2" height="3.2" rx="0.8" />
+            <path d="m2.7 4.8.8.8 1.3-1.4" />
+            <path d="M6.9 4.6h7.2M6.9 8h7.2M6.9 11.4h4.6" />
+          </svg>
+        </button>
+        <button type="button" class="tool-btn" data-action="blockquote" title="Blockquote (Ctrl+Shift+Q)" aria-label="Blockquote">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2.2 4.6 3.9 8l-1.7 3.4" />
+            <path d="M6.6 4.8h7.4M6.6 8h7.4M6.6 11.2h4.8" />
+          </svg>
+        </button>
+        <button type="button" class="tool-btn" data-action="inline-code" title="Inline code (Ctrl+Shift+C)" aria-label="Inline code">
+          <span class="glyph glyph-tick" aria-hidden="true">`</span>
+        </button>
+        <button type="button" class="tool-btn" data-action="strikethrough" title="Strikethrough (Ctrl+Shift+X)" aria-label="Strikethrough">
+          <span class="glyph glyph-strike" aria-hidden="true">S</span>
+        </button>
+        <button type="button" class="tool-btn" data-action="horizontal-rule" title="Horizontal rule" aria-label="Horizontal rule">
+          <span class="glyph glyph-hr" aria-hidden="true">—</span>
+        </button>
+
+        <span class="tool-sep" role="separator"></span>
+
         <button type="button" class="tool-btn" data-action="mode-raw" data-toggle="mode" aria-pressed="false" title="Raw source only (Ctrl+1)" aria-label="Raw source">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M5.4 4.3 1.9 8l3.5 3.7" />
             <path d="M10.6 4.3 14.1 8l-3.5 3.7" />
           </svg>
         </button>
-        <button type="button" class="tool-btn" data-action="mode-split" data-toggle="mode" aria-pressed="true" title="Raw and preview side by side (Ctrl+2)" aria-label="Split view">
+        <button type="button" class="tool-btn" data-action="mode-split" data-toggle="mode" aria-pressed="true" title="Raw and the rendered pane side by side (Ctrl+2)" aria-label="Split view">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="1.9" y="2.9" width="12.2" height="10.2" rx="1.1" />
             <path d="M8 2.9v10.2" />
           </svg>
         </button>
-        <button type="button" class="tool-btn" data-action="mode-preview" data-toggle="mode" aria-pressed="false" title="Preview only (Ctrl+3)" aria-label="Preview">
+        <button type="button" class="tool-btn" data-action="mode-preview" data-toggle="mode" aria-pressed="false" title="Read-only preview (Ctrl+3)" aria-label="Preview">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M1.6 8S4 3.9 8 3.9 14.4 8 14.4 8 12 12.1 8 12.1 1.6 8 1.6 8Z" />
             <circle cx="8" cy="8" r="1.9" />
@@ -156,9 +192,31 @@
           <nav id="breadcrumb" class="breadcrumb" aria-label="Open document path"></nav>
           <div id="workspace" class="workspace">
             <div id="editor-host" class="pane editor-pane"></div>
-            <div id="preview-scroll" class="pane preview-pane">
-              <article id="preview" class="markdown-body"></article>
-            </div>
+            <section class="pane preview-pane" aria-label="Rendered pane">
+              <div class="pane-bar">
+                <span id="pane-label" class="pane-bar-label">Rendered</span>
+                <button
+                  type="button"
+                  id="pane-toggle"
+                  class="pane-toggle"
+                  aria-pressed="false"
+                  title="Show the read-only preview, including tables (Ctrl+Alt+P)"
+                  aria-label="Show read-only preview"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="icon-eye">
+                    <path d="M1.6 8S4 3.9 8 3.9 14.4 8 14.4 8 12 12.1 8 12.1 1.6 8 1.6 8Z" />
+                    <circle cx="8" cy="8" r="1.9" />
+                  </svg>
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="icon-pen">
+                    <path d="M10.8 2.4 13.6 5.2 6.2 12.6 2.9 13.1 3.4 9.8Z" />
+                    <path d="M9.5 3.7 12.3 6.5" />
+                  </svg>
+                </button>
+              </div>
+              <div id="preview-scroll" class="preview-scroller">
+                <article id="preview" class="markdown-body"></article>
+              </div>
+            </section>
           </div>
           <footer id="statusbar" class="statusbar">
             <span id="stat-file" class="stat stat-file"></span>
@@ -170,6 +228,42 @@
             <span id="stat-mode" class="stat" title="View mode">Split</span>
           </footer>
         </main>
+      </div>
+    </div>
+    <div id="prefs-backdrop" class="modal-backdrop" hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="prefs-title" aria-describedby="prefs-note">
+        <h2 id="prefs-title" class="modal-title">Preferences</h2>
+        <div class="modal-body">
+          <div class="pref-block">
+            <span class="pref-label" id="prefs-home-label">Home folder</span>
+            <p class="pref-hint">The folder the sidebar opens with when the app starts.</p>
+            <div class="pref-folder" role="group" aria-labelledby="prefs-home-label">
+              <input id="prefs-home" class="pref-input" type="text" readonly aria-labelledby="prefs-home-label" placeholder="Not set — reuse the last folder" />
+              <button type="button" id="prefs-browse" class="btn">Browse…</button>
+              <button type="button" id="prefs-clear" class="btn">Clear</button>
+            </div>
+          </div>
+
+          <fieldset class="pref-block pref-fieldset">
+            <legend class="pref-label">Default view mode</legend>
+            <div class="pref-choices">
+              <label class="pref-choice"><input type="radio" name="prefs-mode" value="raw" /> <span>Raw</span></label>
+              <label class="pref-choice"><input type="radio" name="prefs-mode" value="split" /> <span>Split</span></label>
+              <label class="pref-choice"><input type="radio" name="prefs-mode" value="preview" /> <span>Preview</span></label>
+            </div>
+          </fieldset>
+
+          <div class="pref-block">
+            <label class="pref-choice"><input id="prefs-sidebar" type="checkbox" /> <span>Show the folder sidebar when the app starts</span></label>
+            <p class="pref-hint">Takes effect once a folder is open, here or from the last session.</p>
+          </div>
+
+          <p id="prefs-note" class="modal-hint">These are starting defaults. Changing the view or the sidebar while you work still applies for the rest of the session.</p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="prefs-cancel" class="btn">Cancel</button>
+          <button type="button" id="prefs-save" class="btn btn-primary">Save</button>
+        </div>
       </div>
     </div>
     <div id="drop-overlay" class="drop-overlay" hidden>

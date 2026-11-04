@@ -154,6 +154,29 @@ body.resizing {
   font-size: 15px;
 }
 
+.tool-btn .glyph-ol {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.tool-btn .glyph-tick {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  line-height: 0.7;
+}
+
+.tool-btn .glyph-strike {
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: line-through;
+}
+
+.tool-btn .glyph-hr {
+  font-size: 16px;
+  letter-spacing: -1px;
+}
+
 .tool-sep {
   flex: 0 0 auto;
   width: 1px;
@@ -267,6 +290,24 @@ body.resizing {
   color: var(--fg-muted);
   font-style: italic;
   padding: 6px 0;
+}
+
+.tree-row.up {
+  color: var(--fg-muted);
+  font-weight: 600;
+}
+
+.tree-row.up:hover {
+  color: var(--fg);
+}
+
+.tree-row.up .twisty {
+  font-size: 12px;
+}
+
+.tree-row.up:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .sidebar-resizer {
@@ -469,9 +510,89 @@ body.resizing .sidebar-resizer {
 
 .preview-pane {
   flex: 1 1 50%;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border-left: 1px solid var(--border);
   background: var(--bg);
+}
+
+/* Slim header on the rendered pane: its own view toggle, hidden outside Split. */
+.pane-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 28px;
+  padding: 0 8px 0 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+body:not([data-mode="split"]) .pane-bar {
+  display: none;
+}
+
+.pane-bar-label {
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.pane-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.pane-toggle:hover {
+  background: var(--hover);
+  border-color: var(--border);
+  opacity: 1;
+}
+
+.pane-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.pane-toggle svg {
+  width: 14px;
+  height: 14px;
+  display: none;
+}
+
+/* The icon states what the pane currently is: a pencil while editable, an eye once
+   it is the read-only preview, so a click never leaves the state ambiguous. */
+body[data-pane="preview"] .pane-toggle .icon-eye,
+body:not([data-pane="preview"]) .pane-toggle .icon-pen {
+  display: block;
+}
+
+body[data-pane="preview"] .pane-bar {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+body[data-pane="preview"] .pane-bar-label {
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.preview-scroller {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
 body[data-mode="raw"] .preview-pane {
@@ -499,6 +620,17 @@ body[data-mode="preview"] .preview-pane {
 .markdown-body img {
   max-width: 100%;
   height: auto;
+}
+
+/* Task lists: keep the box on the text baseline and pull it into the list gutter, so the
+   label starts where the bullet of a normal list would. */
+.markdown-body .task-list-item {
+  list-style: none;
+}
+
+.markdown-body .task-list-item input[type="checkbox"] {
+  margin: 0 0.4em 0 -1.35em;
+  vertical-align: middle;
 }
 
 .img-blocked {
@@ -677,6 +809,167 @@ body[data-mode="preview"] .preview-pane {
   }
 }
 
+/* ------------------------------------------------------------------ modal UI */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+.modal {
+  width: min(520px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.modal-title {
+  margin: 0;
+  padding: 16px 18px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px;
+  overflow: auto;
+}
+
+.modal-hint {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.pref-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pref-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pref-label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.pref-hint {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 12.5px;
+}
+
+.pref-folder {
+  display: flex;
+  gap: 6px;
+}
+
+.pref-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg-elevated);
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  text-overflow: ellipsis;
+}
+
+.pref-input:placeholder-shown {
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
+.pref-choices {
+  display: flex;
+  gap: 18px;
+  padding-top: 2px;
+}
+
+.pref-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pref-choice input {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.btn {
+  appearance: none;
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg-elevated);
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--hover);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.06);
+  background: var(--accent);
+}
+
 /* ---------------------------------------------------------------------- print */
 
 @media print {
@@ -704,6 +997,7 @@ body[data-mode="preview"] .preview-pane {
   .sidebar,
   .sidebar-resizer,
   .editor-pane,
+  .modal-backdrop,
   .drop-overlay {
     display: none !important;
   }
@@ -713,6 +1007,14 @@ body[data-mode="preview"] .preview-pane {
     border: 0;
     overflow: visible;
     flex: none;
+  }
+
+  .pane-bar {
+    display: none !important;
+  }
+
+  .preview-scroller {
+    overflow: visible;
   }
 
   #preview.markdown-body {
@@ -749,4 +1051,74 @@ body[data-mode="preview"] .preview-pane {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+}
+
+/* ------------------------------------------ editable rendered pane (split view) */
+
+#preview .ProseMirror {
+  min-height: 100%;
+  outline: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  caret-color: currentColor;
+}
+
+#preview .ProseMirror > *:first-child {
+  margin-top: 0;
+}
+
+#preview .ProseMirror .pm-softbreak {
+  white-space: pre;
+}
+
+/* Markdown the schema cannot model is shown, not silently rewritten. */
+#preview .ProseMirror .pm-verbatim {
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  opacity: 0.9;
+  overflow-x: auto;
+}
+
+#preview .ProseMirror .pm-verbatim::before {
+  content: "raw block — edit in Raw";
+  display: block;
+  margin-bottom: 6px;
+  font: 10px/1.6 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+#preview .ProseMirror .pm-task-box {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 0.5em 0.1em 0;
+}
+
+#preview .ProseMirror li:has(> p > .pm-task-box) {
+  list-style: none;
+}
+
+#preview .ProseMirror .pm-task-input {
+  margin: 0;
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+  accent-color: var(--accent, #4c8dff);
+}
+
+#preview .ProseMirror img.pm-image {
+  max-width: 100%;
+  height: auto;
+}
+
+#preview .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid var(--accent, #4c8dff);
+  outline-offset: 2px;
+}
+
+body[data-mode="split"] .preview-pane:focus-within {
+  box-shadow: inset 0 0 0 1px var(--border);
 }

@@ -1,6 +1,6 @@
 [package]
 name = "markdown-studio"
-version = "0.5.3"
+version = "0.9.1"
 description = "Markdown Studio - a lightweight Markdown editor for Windows"
 authors = ["Shailesh"]
 edition = "2021"

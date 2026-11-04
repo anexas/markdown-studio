@@ -1,4 +1,4 @@
-import type { ViewMode } from "./types";
+import type { PaneView, ViewMode } from "./types";
 
 const SESSION_KEY = "markdown-studio.session.v1";
 const MAX_RECENT = 12;
@@ -8,6 +8,8 @@ export const ZOOM_MAX = 2.4;
 
 export interface Session {
   mode: ViewMode;
+  /** Right pane view in Split: the editable rendered pane, or the read-only preview. */
+  paneView: PaneView;
   /** Text scale for the editor and preview, 1 = 100%. */
   zoom: number;
   activeIndex: number;
@@ -18,6 +20,7 @@ export interface Session {
 
 export const DEFAULT_SESSION: Session = {
   mode: "split",
+  paneView: "rendered",
   zoom: 1,
   activeIndex: 0,
   tabs: [],
@@ -32,6 +35,7 @@ export function loadSession(): Session {
     const parsed = JSON.parse(raw) as Partial<Session>;
     return {
       mode: parsed.mode === "raw" || parsed.mode === "preview" ? parsed.mode : "split",
+      paneView: parsed.paneView === "preview" ? "preview" : "rendered",
       zoom: clampZoom(parsed.zoom),
       activeIndex: typeof parsed.activeIndex === "number" ? parsed.activeIndex : 0,
       tabs: Array.isArray(parsed.tabs) ? parsed.tabs.filter((t) => typeof t === "string") : [],

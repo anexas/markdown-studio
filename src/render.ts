@@ -52,11 +52,30 @@ interface SanitizeOptions {
 }
 
 const SANITIZE_OPTIONS: SanitizeOptions = {
-  FORBID_TAGS: ["style", "script", "iframe", "object", "embed", "form", "input", "link", "meta", "base", "video", "audio"],
+  // `input` is deliberately absent: task lists need their checkbox to survive. The hook
+  // below narrows it back down to a disabled, unnamed checkbox and drops everything else.
+  FORBID_TAGS: ["style", "script", "iframe", "object", "embed", "form", "link", "meta", "base", "video", "audio"],
   FORBID_ATTR: ["style", "srcset", "formaction", "ping", "autofocus"],
   ALLOW_DATA_ATTR: false,
   KEEP_CONTENT: true,
 };
+
+/**
+ * A preview needs exactly one kind of form control. Allowing `input` wholesale would let a
+ * document render text boxes or buttons, so anything that is not a checkbox is removed, and
+ * the survivors lose their name so they can never take part in a submission.
+ */
+DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+  if (node.nodeName !== "INPUT") return;
+  const element = node as Element;
+
+  if (element.getAttribute("type") !== "checkbox") {
+    element.parentNode?.removeChild(element);
+    return;
+  }
+  element.removeAttribute("name");
+  element.setAttribute("disabled", "");
+});
 
 export function renderToHtml(source: string): string {
   return DOMPurify.sanitize(md.render(source), SANITIZE_OPTIONS);

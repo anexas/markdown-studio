@@ -3,23 +3,35 @@ import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open as openDialog, save as saveDialog, ask, message } from "@tauri-apps/plugin-dialog";
 import { redo, undo } from "@codemirror/commands";
+import { EditorView } from "@codemirror/view";
 
 import {
   createEditor,
   createState,
   cursorPosition,
   insertCodeBlock,
+  insertHorizontalRule,
   insertTable,
   openFindPanel,
   setHeading,
+  toggleBlockquote,
+  toggleBulletList,
+  toggleInlineCode,
+  toggleOrderedList,
+  toggleStrikethrough,
+  toggleTaskList,
   wrapSelection,
 } from "./editor";
 import type { EditorEnv } from "./editor";
+import { createWysiwyg, minimalChange } from "./wysiwyg";
+import type { Wysiwyg } from "./wysiwyg";
 import { hydratePreview, renderToHtml } from "./render";
 import { Sidebar, isUnderRoot } from "./sidebar";
 import { ZOOM_MAX, ZOOM_MIN, clampWidth, clampZoom, loadSession, pushRecent, saveSession } from "./session";
+import { DEFAULT_PREFS, hasPrefs, loadPrefs, savePrefs } from "./prefs";
+import type { Prefs } from "./prefs";
 import { baseName, dirName, isMarkdownPath } from "./types";
-import type { Doc, DocPayload, ViewMode } from "./types";
+import type { Doc, DocPayload, PaneView, ViewMode } from "./types";
 
 const appWindow = getCurrentWindow();
 
@@ -38,6 +50,8 @@ const el = {
   editorHost: must<HTMLElement>("editor-host"),
   previewScroll: must<HTMLElement>("preview-scroll"),
   preview: must<HTMLElement>("preview"),
+  paneLabel: must<HTMLElement>("pane-label"),
+  paneToggle: must<HTMLButtonElement>("pane-toggle"),
   sidebarTitle: must<HTMLElement>("sidebar-title"),
   tree: must<HTMLElement>("tree"),
   statFile: must<HTMLElement>("stat-file"),
@@ -47,17 +61,29 @@ const el = {
   statEnc: must<HTMLElement>("stat-enc"),
   statMode: must<HTMLElement>("stat-mode"),
   dropOverlay: must<HTMLElement>("drop-overlay"),
+  shell: must<HTMLElement>("shell"),
+  prefsBackdrop: must<HTMLElement>("prefs-backdrop"),
+  prefsHome: must<HTMLInputElement>("prefs-home"),
+  prefsBrowse: must<HTMLButtonElement>("prefs-browse"),
+  prefsClear: must<HTMLButtonElement>("prefs-clear"),
+  prefsSidebar: must<HTMLInputElement>("prefs-sidebar"),
+  prefsSave: must<HTMLButtonElement>("prefs-save"),
+  prefsCancel: must<HTMLButtonElement>("prefs-cancel"),
 };
 
 let env: EditorEnv;
 let docs: Doc[] = [];
 let activeIndex = -1;
 let mode: ViewMode = "split";
+let paneView: PaneView = "rendered";
 let recent: string[] = [];
 let sidebarVisible = false;
 let sidebarWidth = 240;
 let docSeq = 0;
 let zoom = 1;
+let prefs: Prefs = { ...DEFAULT_PREFS };
+let prefsHomeDraft: string | null = null;
+let prefsOpen = false;
 
 const ZOOM_STEP = 0.1;
 
@@ -66,10 +92,22 @@ let statusTimer = 0;
 let sessionTimer = 0;
 let scrollLockSource: "editor" | "preview" | "" = "";
 let scrollLockUntil = 0;
+let wys: Wysiwyg | null = null;
+/** Set while a preview edit is being pushed into CodeMirror, so it is not mirrored back. */
+let editingPreview = false;
 
-const sidebar = new Sidebar(el.tree, el.sidebarTitle, (path) => {
-  void openPath(path);
-});
+const sidebar = new Sidebar(
+  el.tree,
+  el.sidebarTitle,
+  (path) => {
+    void openPath(path);
+  },
+  // Same path as Open Folder: re-roots, reveals the focused document if it is under the
+  // new root, and persists the change.
+  (dir) => {
+    void openFolder(dir);
+  },
+);
 
 function activeDoc(): Doc | undefined {
   return docs[activeIndex];
@@ -110,12 +148,105 @@ function makeDoc(content: string, path: string | null, eol: "\n" | "\r\n", bom: 
 
 /* ---------------------------------------------------------------- rendering */
 
+function destroyWysiwyg(): void {
+  if (!wys) return;
+  wys.destroy();
+  wys = null;
+  el.preview.replaceChildren();
+}
+
+/** Push a preview edit into the buffer that owns the text. */
+function applyPreviewEdit(markdown: string, anchor: number, head: number): void {
+  if (!activeDoc()) return;
+  const current = env.view.state.doc.toString();
+  const selection = {
+    anchor: Math.min(anchor, markdown.length),
+    head: Math.min(head, markdown.length),
+  };
+  const change = minimalChange(current, markdown);
+  const untouched = change.from === change.to && change.insert === "";
+
+  editingPreview = true;
+  // The preview is the pane being edited, so the source pane's scroll events must not
+  // drag the rendered pane around while this edit settles.
+  scrollLockSource = "preview";
+  scrollLockUntil = performance.now() + 250;
+  try {
+    env.view.dispatch({
+      changes: untouched ? undefined : change,
+      selection,
+      // Keep the source caret on screen without moving it when it already is.
+      effects: EditorView.scrollIntoView(selection.anchor, { y: "nearest" }),
+    });
+  } finally {
+    editingPreview = false;
+  }
+}
+
+function syncWysiwyg(doc: Doc): void {
+  if (!wys) {
+    // The read-only article may still be mounted from Preview mode.
+    el.preview.replaceChildren();
+    wys = createWysiwyg(el.preview, contentOf(doc), {
+      docDir: doc.dir,
+      onEdit: applyPreviewEdit,
+      // Clicking in the preview moves the source caret, so toolbar commands and the
+      // status bar follow the place the user is actually working in.
+      onSelect: (anchor, head) => {
+        const length = env.view.state.doc.length;
+        const from = Math.max(0, Math.min(anchor, length));
+        const to = Math.max(0, Math.min(head, length));
+        const current = env.view.state.selection.main;
+        if (current.anchor === from && current.head === to) return;
+        env.view.dispatch({
+          selection: { anchor: from, head: to },
+          effects: EditorView.scrollIntoView(from, { y: "nearest" }),
+        });
+      },
+      onUndo: () => undo(env.view),
+      onRedo: () => redo(env.view),
+    });
+  }
+  wys.setDocDir(doc.dir);
+  wys.setMarkdown(contentOf(doc), env.view.state.selection.main.head);
+}
+
+/** Right pane view in Split: the editable rendered pane, or a read-only preview. */
+function setPaneView(next: PaneView): void {
+  paneView = next;
+  document.body.dataset.pane = next;
+  renderPaneBar();
+  if (mode === "split") scheduleRender(true);
+  scheduleSessionSave();
+}
+
+function renderPaneBar(): void {
+  const readOnly = paneView === "preview";
+  el.paneLabel.textContent = readOnly ? "Preview \u00B7 read-only" : "Rendered \u00B7 editable";
+  el.paneToggle.setAttribute("aria-pressed", readOnly ? "true" : "false");
+  el.paneToggle.title = readOnly
+    ? "Switch back to the editable rendered pane (Ctrl+Alt+P)"
+    : "Show the read-only preview, including tables (Ctrl+Alt+P)";
+  el.paneToggle.setAttribute(
+    "aria-label",
+    readOnly ? "Switch to the editable rendered pane" : "Show read-only preview",
+  );
+}
+
 function renderPreviewNow(): void {
   const doc = activeDoc();
   if (!doc) {
+    destroyWysiwyg();
     el.preview.replaceChildren();
     return;
   }
+  // Split view edits the rendered side. Preview stays a read-only render, so there is always
+  // one pane that shows exactly what the file says and printing keeps a faithful target.
+  if (mode === "split" && paneView === "rendered") {
+    syncWysiwyg(doc);
+    return;
+  }
+  destroyWysiwyg();
   const html = renderToHtml(contentOf(doc));
   const keep = el.previewScroll.scrollTop;
   el.preview.innerHTML = html;
@@ -145,6 +276,8 @@ function ratioSync(from: HTMLElement, to: HTMLElement): void {
 
 function onEditorScroll(): void {
   if (mode !== "split" || !env) return;
+  // While the user is working in the rendered pane, that pane owns the scroll position.
+  if (el.preview.contains(document.activeElement)) return;
   if (scrollLockSource === "preview" && performance.now() < scrollLockUntil) return;
   scrollLockSource = "editor";
   scrollLockUntil = performance.now() + 140;
@@ -297,6 +430,7 @@ function scheduleSessionSave(): void {
 function persist(): void {
   saveSession({
     mode,
+    paneView,
     zoom,
     activeIndex: Math.max(activeIndex, 0),
     tabs: docs.filter((doc) => doc.path !== null).map((doc) => doc.path as string),
@@ -484,13 +618,33 @@ async function openFolder(path: string): Promise<void> {
  */
 async function trackInSidebar(path: string | null): Promise<void> {
   if (!path) return;
+
   const root = sidebar.getRoot();
-  if (!root || !isUnderRoot(root, path)) {
+
+  if (!root) {
     try {
-      await sidebar.open(dirName(path));
+      await sidebar.open(prefs.homeFolder ?? dirName(path));
     } catch {
       // A folder that cannot be listed must not stop the document from opening.
     }
+    await sidebar.reveal(path);
+    return;
+  }
+
+  if (isUnderRoot(root, path)) {
+    await sidebar.reveal(path);
+    return;
+  }
+
+  // A configured home folder is an anchor. Opening a file from elsewhere still shows it
+  // in a tab, but silently re-rooting the tree would undo the folder the user chose; the
+  // breadcrumb's folder buttons and Open Folder remain the explicit way to move it.
+  if (prefs.homeFolder) return;
+
+  try {
+    await sidebar.open(dirName(path));
+  } catch {
+    // A folder that cannot be listed must not stop the document from opening.
   }
   await sidebar.reveal(path);
 }
@@ -512,9 +666,11 @@ function setMode(next: ViewMode): void {
   mode = next;
   document.body.dataset.mode = next;
   updateStatus();
-  if (next !== "raw") scheduleRender(true);
-  else {
+  if (next === "raw") {
+    destroyWysiwyg();
     env.view.focus();
+  } else {
+    scheduleRender(true);
   }
   syncToolbar();
   scheduleSessionSave();
@@ -537,12 +693,123 @@ function cycleMode(): void {
   setMode(mode === "raw" ? "split" : mode === "split" ? "preview" : "raw");
 }
 
+/* -------------------------------------------------------------- preferences */
+
+function chosenMode(): ViewMode {
+  const checked = document.querySelector<HTMLInputElement>('input[name="prefs-mode"]:checked');
+  const value = checked?.value;
+  return value === "raw" || value === "preview" ? value : "split";
+}
+
+function setPrefMode(next: ViewMode): void {
+  document.querySelectorAll<HTMLInputElement>('input[name="prefs-mode"]').forEach((radio) => {
+    radio.checked = radio.value === next;
+  });
+}
+
+function openPreferences(): void {
+  // The dialog edits a draft so Cancel leaves the live settings untouched.
+  prefsHomeDraft = prefs.homeFolder;
+  el.prefsHome.value = prefsHomeDraft ?? "";
+  setPrefMode(prefs.defaultMode);
+  el.prefsSidebar.checked = prefs.sidebarVisible;
+  el.prefsBackdrop.hidden = false;
+  // `inert` keeps Tab and screen readers inside the dialog without a hand-rolled trap.
+  el.shell.inert = true;
+  prefsOpen = true;
+  el.prefsBrowse.focus();
+}
+
+function closePreferences(): void {
+  if (!prefsOpen) return;
+  prefsOpen = false;
+  el.prefsBackdrop.hidden = true;
+  el.shell.inert = false;
+  env?.view.focus();
+}
+
+async function savePreferences(): Promise<void> {
+  const home = prefsHomeDraft?.trim() ? prefsHomeDraft.trim() : null;
+
+  // A folder that no longer exists would otherwise fail on every launch, silently.
+  if (home) {
+    try {
+      await invoke("list_folder", { path: home });
+    } catch (err) {
+      await message(`That folder could not be read:\n\n${String(err)}`, {
+        title: "Home folder not usable",
+        kind: "error",
+      });
+      return;
+    }
+  }
+
+  prefs = { homeFolder: home, defaultMode: chosenMode(), sidebarVisible: el.prefsSidebar.checked };
+  savePrefs(prefs);
+
+  setMode(prefs.defaultMode);
+
+  if (home) {
+    try {
+      await sidebar.open(home);
+      await sidebar.reveal(activeDoc()?.path ?? null);
+    } catch (err) {
+      // Validated above, so this is a race - but silently leaving the old tree on screen
+      // is exactly what makes the setting look ignored, so say what happened.
+      await message(`The home folder could not be opened:\n\n${String(err)}`, {
+        title: "Home folder unavailable",
+        kind: "warning",
+      });
+    }
+  } else if (sidebar.getRoot()) {
+    // Clearing the home folder keeps the open tree, refreshed in case it changed on disk.
+    await sidebar.reload();
+  }
+
+  // An empty sidebar reads as a rendering bug, so the setting only applies to a real tree.
+  setSidebarVisible(prefs.sidebarVisible && sidebar.getRoot() !== null);
+
+  closePreferences();
+  persist();
+}
+
+function installPreferences(): void {
+  el.prefsBrowse.addEventListener("click", () => {
+    void (async () => {
+      const chosen = await openDialog({
+        title: "Choose home folder",
+        directory: true,
+        multiple: false,
+        defaultPath: prefsHomeDraft ?? undefined,
+      });
+      if (typeof chosen !== "string") return;
+      prefsHomeDraft = chosen;
+      el.prefsHome.value = chosen;
+    })();
+  });
+
+  el.prefsClear.addEventListener("click", () => {
+    prefsHomeDraft = null;
+    el.prefsHome.value = "";
+  });
+
+  el.prefsCancel.addEventListener("click", closePreferences);
+  el.prefsSave.addEventListener("click", () => void savePreferences());
+
+  // Clicking the dimmed area dismisses, the way a native sheet does.
+  el.prefsBackdrop.addEventListener("mousedown", (event) => {
+    if (event.target === el.prefsBackdrop) closePreferences();
+  });
+}
+
 /* ------------------------------------------------------------------ actions */
 
 let lastAction = "";
 let lastActionAt = 0;
 
 function runAction(id: string): void {
+  // The preferences sheet is modal: menu accelerators must not reach the document behind it.
+  if (prefsOpen && id !== "preferences") return;
   const now = performance.now();
   if (id === lastAction && now - lastActionAt < 250) return;
   lastAction = id;
@@ -618,6 +885,27 @@ function runAction(id: string): void {
     case "table":
       insertTable(env.view);
       break;
+    case "bullet-list":
+      toggleBulletList(env.view);
+      break;
+    case "ordered-list":
+      toggleOrderedList(env.view);
+      break;
+    case "task-list":
+      toggleTaskList(env.view);
+      break;
+    case "blockquote":
+      toggleBlockquote(env.view);
+      break;
+    case "inline-code":
+      toggleInlineCode(env.view);
+      break;
+    case "strikethrough":
+      toggleStrikethrough(env.view);
+      break;
+    case "horizontal-rule":
+      insertHorizontalRule(env.view);
+      break;
     case "mode-raw":
       setMode("raw");
       break;
@@ -630,11 +918,17 @@ function runAction(id: string): void {
     case "mode-cycle":
       cycleMode();
       break;
+    case "toggle-pane-view":
+      setPaneView(paneView === "preview" ? "rendered" : "preview");
+      break;
     case "toggle-sidebar":
       toggleSidebar();
       break;
     case "reload-folders":
       void sidebar.reload();
+      break;
+    case "preferences":
+      openPreferences();
       break;
     case "about":
       void showAbout();
@@ -690,12 +984,14 @@ async function showShortcuts(): Promise<void> {
     "  Ctrl+Shift+S    Save as",
     "  Ctrl+W          Close tab",
     "  Ctrl+P          Print / export PDF",
+    "  Ctrl+,          Preferences",
     "",
     "View",
     "  Ctrl+E          Cycle Raw / Split / Preview",
     "  Ctrl+1          Raw",
     "  Ctrl+2          Split",
     "  Ctrl+3          Preview",
+    "  Ctrl+Alt+P      Rendered pane: read-only preview / back",
     "  Ctrl+Shift+B    Toggle folder sidebar",
     "  Ctrl+Shift+F5   Reload folder tree",
     "  Ctrl+=          Zoom in (editor and preview)",
@@ -710,6 +1006,12 @@ async function showShortcuts(): Promise<void> {
     "  Ctrl+Alt+1..4   Heading 1 to 4",
     "  Ctrl+Alt+C      Code block",
     "  Ctrl+Alt+T      Table",
+    "  Ctrl+Shift+L    Bulleted list",
+    "  Ctrl+Shift+N    Numbered list",
+    "  Ctrl+Shift+T    Task list",
+    "  Ctrl+Shift+Q    Blockquote",
+    "  Ctrl+Shift+C    Inline code",
+    "  Ctrl+Shift+X    Strikethrough",
   ].join("\n");
   await message(text, { title: "Keyboard shortcuts", kind: "info" });
 }
@@ -724,6 +1026,7 @@ const KEY_ACTIONS: Record<string, string> = {
   "ctrl+shift+s": "save-as",
   "ctrl+w": "close",
   "ctrl+p": "print",
+  "ctrl+,": "preferences",
   "ctrl+f": "find",
   "ctrl+b": "bold",
   "ctrl+i": "italic",
@@ -732,6 +1035,7 @@ const KEY_ACTIONS: Record<string, string> = {
   "ctrl+1": "mode-raw",
   "ctrl+2": "mode-split",
   "ctrl+3": "mode-preview",
+  "ctrl+alt+p": "toggle-pane-view",
   "ctrl+shift+b": "toggle-sidebar",
   "ctrl+alt+1": "h1",
   "ctrl+alt+2": "h2",
@@ -739,10 +1043,26 @@ const KEY_ACTIONS: Record<string, string> = {
   "ctrl+alt+4": "h4",
   "ctrl+alt+c": "code-block",
   "ctrl+alt+t": "table",
+  "ctrl+shift+l": "bullet-list",
+  "ctrl+shift+n": "ordered-list",
+  "ctrl+shift+t": "task-list",
+  "ctrl+shift+q": "blockquote",
+  "ctrl+shift+c": "inline-code",
+  "ctrl+shift+x": "strikethrough",
 };
 
 function installKeyboardFallback(): void {
   window.addEventListener("keydown", (event) => {
+    // While the sheet is open only Escape means anything; the rest would edit the
+    // document it is covering.
+    if (prefsOpen) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closePreferences();
+      }
+      return;
+    }
+
     const parts: string[] = [];
     if (event.ctrlKey) parts.push("ctrl");
     if (event.shiftKey) parts.push("shift");
@@ -864,17 +1184,25 @@ function installMenuBridge(): void {
 
 export async function initApp(): Promise<void> {
   const session = loadSession();
-  mode = session.mode;
+  prefs = loadPrefs();
+  // Until the dialog has been saved once, the last session's view wins, so upgrading
+  // does not silently change how the app opens.
+  const prefsConfigured = hasPrefs();
+  mode = prefsConfigured ? prefs.defaultMode : session.mode;
   recent = session.recent;
   sidebarWidth = session.sidebar.width;
   zoom = clampZoom(session.zoom);
   document.body.dataset.mode = mode;
+  paneView = session.paneView;
+  document.body.dataset.pane = paneView;
+  renderPaneBar();
   document.documentElement.style.setProperty("--sidebar-width", `${sidebarWidth}px`);
   applyZoom();
 
   env = createEditor(el.editorHost, {
     onDocChanged: () => {
-      scheduleRender();
+      // A preview edit already owns the rendered document; re-rendering would reset it.
+      if (!editingPreview) scheduleRender();
       updateTitle();
       renderTabs();
       updateStatus();
@@ -885,6 +1213,9 @@ export async function initApp(): Promise<void> {
 
   env.view.scrollDOM.addEventListener("scroll", onEditorScroll, { passive: true });
   el.previewScroll.addEventListener("scroll", onPreviewScroll, { passive: true });
+  el.paneToggle.addEventListener("click", () => {
+    setPaneView(paneView === "preview" ? "rendered" : "preview");
+  });
 
   el.preview.addEventListener("click", (event) => {
     const anchor = (event.target as HTMLElement | null)?.closest("a");
@@ -910,15 +1241,28 @@ export async function initApp(): Promise<void> {
   document.getElementById("sidebar-close")?.addEventListener("click", () => setSidebarVisible(false));
 
   installToolbar();
+  installPreferences();
   installSidebarResizer();
   installKeyboardFallback();
   installMenuBridge();
   await installDragDrop();
   await installCloseGuard();
 
-  if (session.sidebar.root) {
-    await sidebar.open(session.sidebar.root);
-    if (session.sidebar.visible) setSidebarVisible(true);
+  const startupRoot = prefsConfigured && prefs.homeFolder ? prefs.homeFolder : session.sidebar.root;
+  const startupSidebar = prefsConfigured ? prefs.sidebarVisible : session.sidebar.visible;
+  if (startupRoot) {
+    try {
+      await sidebar.open(startupRoot);
+      if (startupSidebar) setSidebarVisible(true);
+    } catch (err) {
+      // A home folder that has been moved or deleted must not block startup.
+      if (prefsConfigured && prefs.homeFolder) {
+        await message(`The home folder could not be opened:\n\n${String(err)}`, {
+          title: "Home folder unavailable",
+          kind: "warning",
+        });
+      }
+    }
   }
 
   // Files handed to us by the shell ("Open with" or a command-line argument).
