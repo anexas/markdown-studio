@@ -1,22 +1,17 @@
 import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightSpecialChars, drawSelection, dropCursor } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
-import { EditorState, Compartment } from "@codemirror/state";
+import { EditorState } from "@codemirror/state";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { search, searchKeymap, openSearchPanel } from "@codemirror/search";
-import { syntaxHighlighting, defaultHighlightStyle, bracketMatching, indentOnInput } from "@codemirror/language";
+import { syntaxHighlighting, HighlightStyle, bracketMatching, indentOnInput } from "@codemirror/language";
+import { tags } from "@lezer/highlight";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
-import { oneDark } from "@codemirror/theme-one-dark";
-
-const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
 export interface EditorEnv {
   view: EditorView;
   /** Shared by every tab so buffers behave identically. */
   extensions: Extension[];
-  setTheme: (dark: boolean) => void;
-  onThemeChange: (handler: (dark: boolean) => void) => void;
-  isDark: () => boolean;
 }
 
 export interface EditorCallbacks {
@@ -25,19 +20,71 @@ export interface EditorCallbacks {
 }
 
 /**
- * Body text a touch lighter than the stock themes so long documents read more easily:
- * oneDark's #abb2bf is dim on a dark background. The light theme only softens the
- * near-black, which still clears WCAG AA on white.
+ * The raw pane is coloured entirely from CSS variables, never from literals.
+ *
+ * CodeMirror generates its theme class names at runtime, so a user stylesheet cannot target
+ * them reliably — but variables are inherited, so a theme only has to redefine them in
+ * `:root` and the whole pane follows, the same way the toolbar already did. This is also
+ * what lets a custom theme recolour the source side; with the stock oneDark theme it could
+ * not, because that palette is baked into generated selectors.
  */
-function themeFor(dark: boolean): Extension[] {
-  const color = dark ? "#d7dee8" : "#333b44";
-  const tint = EditorView.theme({ "&": { color }, ".cm-content": { color } });
-  return [dark ? oneDark : [], tint];
-}
+const sourceTheme = EditorView.theme(
+  {
+    "&": { color: "var(--source-fg)", backgroundColor: "var(--source-bg)" },
+    ".cm-content": { caretColor: "var(--source-caret)" },
+    ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--source-caret)" },
+    ".cm-selectionBackground, .cm-content ::selection": {
+      backgroundColor: "var(--source-selection) !important",
+    },
+    ".cm-activeLine": { backgroundColor: "var(--source-active-line)" },
+    ".cm-selectionMatch": { backgroundColor: "var(--source-selection)" },
+    ".cm-searchMatch": { backgroundColor: "var(--source-matching)" },
+    ".cm-gutters": {
+      backgroundColor: "var(--source-gutter-bg)",
+      color: "var(--source-gutter-fg)",
+      borderRight: "1px solid var(--border)",
+    },
+    ".cm-activeLineGutter": { backgroundColor: "var(--source-active-line)", color: "var(--source-fg)" },
+    "&.cm-focused .cm-matchingBracket": {
+      backgroundColor: "var(--source-matching)",
+      outline: "none",
+    },
+    ".cm-panels": { backgroundColor: "var(--bg-chrome)", color: "var(--fg)" },
+    ".cm-tooltip": {
+      backgroundColor: "var(--bg-elevated)",
+      color: "var(--fg)",
+      border: "1px solid var(--border)",
+    },
+    ".cm-textfield": { backgroundColor: "var(--bg)", color: "var(--fg)", border: "1px solid var(--border)" },
+    ".cm-button": {
+      backgroundColor: "var(--bg-elevated)",
+      color: "var(--fg)",
+      border: "1px solid var(--border)",
+    },
+  },
+  { dark: false },
+);
+
+/** Syntax colours, also from variables, so a theme can retone the source text. */
+const sourceHighlight = HighlightStyle.define([
+  { tag: tags.heading, color: "var(--syntax-heading)", fontWeight: "600" },
+  { tag: tags.strong, fontWeight: "700" },
+  { tag: tags.emphasis, fontStyle: "italic" },
+  { tag: tags.strikethrough, textDecoration: "line-through" },
+  { tag: tags.link, color: "var(--syntax-link)", textDecoration: "underline" },
+  { tag: tags.url, color: "var(--syntax-link)" },
+  { tag: [tags.comment, tags.quote], color: "var(--syntax-comment)", fontStyle: "italic" },
+  { tag: [tags.keyword, tags.operatorKeyword, tags.modifier], color: "var(--syntax-keyword)" },
+  { tag: [tags.string, tags.special(tags.string)], color: "var(--syntax-string)" },
+  { tag: [tags.number, tags.bool, tags.atom], color: "var(--syntax-number)" },
+  { tag: [tags.function(tags.variableName), tags.className, tags.typeName], color: "var(--syntax-name)" },
+  { tag: [tags.variableName, tags.propertyName, tags.attributeName], color: "var(--syntax-variable)" },
+  { tag: [tags.meta, tags.processingInstruction], color: "var(--syntax-meta)" },
+  { tag: tags.monospace, color: "var(--syntax-string)" },
+  { tag: tags.invalid, color: "var(--syntax-invalid)" },
+]);
 
 export function createEditor(host: HTMLElement, callbacks: EditorCallbacks): EditorEnv {
-  const themeCompartment = new Compartment();
-
   const extensions: Extension[] = [
     lineNumbers(),
     highlightActiveLine(),
@@ -47,12 +94,12 @@ export function createEditor(host: HTMLElement, callbacks: EditorCallbacks): Edi
     history(),
     indentOnInput(),
     bracketMatching(),
-    syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+    syntaxHighlighting(sourceHighlight, { fallback: true }),
     search({ top: true }),
     keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap, indentWithTab]),
     markdown({ base: markdownLanguage, codeLanguages: languages }),
     EditorView.lineWrapping,
-    themeCompartment.of(themeFor(darkQuery.matches)),
+    sourceTheme,
     EditorView.updateListener.of((update) => {
       if (update.docChanged) callbacks.onDocChanged();
       if (update.selectionSet || update.docChanged) callbacks.onSelectionChanged();
@@ -64,24 +111,7 @@ export function createEditor(host: HTMLElement, callbacks: EditorCallbacks): Edi
     parent: host,
   });
 
-  const handlers: Array<(dark: boolean) => void> = [];
-  const listener = (event: MediaQueryListEvent) => {
-    view.dispatch({ effects: themeCompartment.reconfigure(themeFor(event.matches)) });
-    handlers.forEach((handler) => handler(event.matches));
-  };
-  darkQuery.addEventListener("change", listener);
-
-  return {
-    view,
-    extensions,
-    setTheme(dark: boolean) {
-      view.dispatch({ effects: themeCompartment.reconfigure(themeFor(dark)) });
-    },
-    onThemeChange(handler) {
-      handlers.push(handler);
-    },
-    isDark: () => darkQuery.matches,
-  };
+  return { view, extensions };
 }
 
 export function createState(doc: string, extensions: Extension[]): EditorState {

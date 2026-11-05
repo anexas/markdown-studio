@@ -128,8 +128,7 @@
   background-color: #24323a;
 }
 
-/* Mermaid renders its own light-palette SVG, which is why diagrams stay light on
-   a dark page. Mermaid cannot be recoloured through CSS variables; forcing it
-   would take a filter, which distorts its semantic colours, so it is left as is:
-     .mermaid-diagram svg { filter: invert(0.9) hue-rotate(180deg); }
-*/
+/* Mermaid paints fills into the SVG itself, so a stylesheet rule cannot reach
+   them: src/render.ts reads the palette and hands it over when it draws. These
+   diagrams already follow --code-bg (nodes), --border (edges) and --fg-muted
+   (arrows). Override the --diagram-* names to give them their own colours. */

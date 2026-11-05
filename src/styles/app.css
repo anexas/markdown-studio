@@ -15,6 +15,50 @@
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
   --font-ui: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
   --font-mono: "Cascadia Mono", "Consolas", ui-monospace, monospace;
+
+  /* Raw pane. CodeMirror is themed from these, never from literals, so a custom theme
+     that redefines --bg/--fg restyles the source side too. Override an individual
+     --source-* name when the theme wants that pane to differ from the rest of the window. */
+  --source-bg: var(--bg);
+  --source-fg: var(--fg);
+  --source-gutter-bg: var(--bg-chrome);
+  --source-gutter-fg: var(--fg-muted);
+  --source-caret: var(--accent);
+  --source-selection: color-mix(in srgb, var(--accent) 26%, transparent);
+  --source-active-line: color-mix(in srgb, var(--fg) 5%, transparent);
+  --source-matching: color-mix(in srgb, var(--accent) 34%, transparent);
+
+  /* Source syntax colours. Each mixes a fixed hue with the theme's text colour, so one
+     definition stays legible on cream paper and on near-black without every theme
+     restating ten token colours. */
+  --syntax-heading: var(--accent);
+  --syntax-link: var(--accent);
+  --syntax-keyword: color-mix(in srgb, #cf222e 72%, var(--fg));
+  --syntax-string: color-mix(in srgb, #0a3069 76%, var(--fg));
+  --syntax-number: color-mix(in srgb, #0550ae 76%, var(--fg));
+  --syntax-name: color-mix(in srgb, #8250df 76%, var(--fg));
+  --syntax-variable: color-mix(in srgb, #953800 76%, var(--fg));
+  --syntax-comment: var(--fg-muted);
+  --syntax-meta: var(--fg-muted);
+  --syntax-invalid: #cf222e;
+
+  /* Code blocks, read by the export stylesheet and by Mermaid's node fill. */
+  --code-bg: #f6f8fa;
+
+  /* Mermaid diagrams. src/render.ts reads these when it draws an SVG, because Mermaid
+     paints fills into the markup itself — a stylesheet rule cannot reach them. */
+  --diagram-bg: var(--bg);
+  --diagram-node-bg: var(--code-bg);
+  --diagram-node-border: var(--border);
+  --diagram-node-text: var(--fg);
+  --diagram-line: var(--fg-muted);
+  --diagram-text: var(--fg);
+  --diagram-label-bg: var(--bg);
+  --diagram-cluster-bg: var(--bg-elevated);
+  --diagram-cluster-border: var(--border);
+  --diagram-note-bg: var(--code-bg);
+  --diagram-note-border: var(--border);
+  --diagram-accent: var(--accent);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -29,6 +73,7 @@
     --accent-soft: rgba(68, 147, 248, 0.16);
     --hover: rgba(255, 255, 255, 0.06);
     --shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --code-bg: #161b22;
   }
 }
 

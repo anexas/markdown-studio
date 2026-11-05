@@ -4,7 +4,7 @@ A lightweight Markdown editor for Windows 11: raw source on one side, rendered H
 the other, built with Tauri 2 (WebView2) so the installer stays small and no Chromium
 is bundled.
 
-Version 0.10.0 — per-machine MSI, registered as the default handler for `.md`.
+Version 0.10.1 — per-machine MSI, registered as the default handler for `.md`.
 
 ## Features
 
@@ -39,9 +39,10 @@ Version 0.10.0 — per-machine MSI, registered as the default handler for `.md`.
 - **External change detection** — open files are watched. A tab with no unsaved edits
   follows the file when another program rewrites it; a tab with edits shows a banner
   offering **Reload from disk** or **Keep mine**, so neither version is discarded silently.
-- **Custom CSS themes** — choose a `.css` file in Preferences to restyle the preview, the
-  rendered pane and exports. The stylesheet is applied as written, so it can override any
-  built-in style, and it is embedded into HTML exports too.
+- **Custom CSS themes** — choose a `.css` file in Preferences to restyle the whole window:
+  the raw pane, the preview, the rendered pane, Mermaid diagrams and exports. The
+  stylesheet is applied as written, so it can override any built-in style, and it is
+  embedded into HTML exports too.
 - **GFM rendering** — tables, task lists, footnotes, heading anchors, autolinks,
   fenced code with language highlighting.
 - **Tabs** that are always visible, including the empty startup buffer, with dirty

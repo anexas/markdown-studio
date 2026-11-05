@@ -735,6 +735,7 @@ async function exportHtmlDoc(): Promise<void> {
 async function applyTheme(path: string | null): Promise<void> {
   if (!path) {
     clearCustomCss();
+    refreshThemedRendering();
     return;
   }
   const failure = await applyCustomCss(path);
@@ -743,7 +744,20 @@ async function applyTheme(path: string | null): Promise<void> {
       title: "Custom CSS unavailable",
       kind: "warning",
     });
+    return;
   }
+  refreshThemedRendering();
+}
+
+/**
+ * Mermaid bakes the palette into each SVG, so diagrams made under the previous theme would
+ * keep its colours. Redrawing them means rebuilding the pane they live in; the Markdown is
+ * the source of truth, so that costs nothing but a re-render.
+ */
+function refreshThemedRendering(): void {
+  if (!activeDoc() || mode === "raw") return;
+  destroyWysiwyg();
+  scheduleRender(true);
 }
 
 async function closeDoc(index: number): Promise<void> {

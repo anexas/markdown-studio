@@ -1,0 +1,134 @@
+/* ============================================================================
+   mint-meadow.css — dark slate with cool accents.
+   ----------------------------------------------------------------------------
+   Forces a DARK look even when Windows is in light mode (color-scheme below).
+   Same three sections as every theme here: chrome, document text, details.
+
+   Apply with: Preferences → Custom CSS theme → Browse… → this file → OK.
+   ============================================================================ */
+
+/* 1. Chrome ------------------------------------------------------------------ */
+:root {
+  color-scheme: light; /* without this, scrollbars and checkboxes stay light */
+
+  --bg: #f7fcf9;
+  --bg-chrome: #eaf5ef;
+  --bg-elevated: #deeee5;
+  --fg: #344b40;
+  --fg-muted: #748b7e;
+  --border: #d4e5da;
+  --accent: #579c83;
+  --accent-soft: rgba(87, 156, 131, 0.16);
+  --hover: rgba(54, 91, 70, 0.06);
+
+  /* Export-only names. */
+  --code-bg: #e9f4ed;
+  --quote: #748b7e;
+}
+
+/* 2. Document text -----------------------------------------------------------
+   github-markdown-css supplies the pane colours and has no idea about the
+   variables above, so they are repeated for the document surfaces. */
+.markdown-body,
+#preview .ProseMirror {
+  color: #344b40;
+  background: #f7fcf9;
+}
+
+.markdown-body {
+  line-height: 1.65;
+}
+
+#preview.markdown-body {
+  font-size: calc(15px * var(--text-scale)); /* keep the zoom multiplier */
+}
+
+/* 3. Details ----------------------------------------------------------------- */
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  color: #293e33;
+  border-bottom-color: #d4e5da;
+}
+
+.markdown-body a {
+  color: #579c83;
+}
+
+.markdown-body strong {
+  color: #263a30;
+}
+
+/* Code — app.css hard-codes a LIGHT .hljs block; leaving it alone is what makes
+   most “dark themes” look broken. The block is restated here, then the tokens. */
+.markdown-body code,
+.markdown-body pre,
+.hljs {
+  background: #e9f4ed;
+  color: #405a4c;
+  font-family: "Cascadia Mono", Consolas, ui-monospace, monospace;
+}
+
+.markdown-body pre {
+  border: 1px solid #d4e5da;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #839a8c;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in {
+  color: #8b75b5;
+}
+
+.hljs-string,
+.hljs-attr,
+.hljs-template-variable {
+  color: #568c65;
+}
+
+.hljs-number,
+.hljs-literal {
+  color: #c56f78;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-name {
+  color: #568ba2;
+}
+
+/* Tables, quotes, rules. */
+.markdown-body table {
+  border-color: #d4e5da;
+}
+
+/* GitHub styles tables with `.markdown-body table th`, so a theme must match
+   that shape to beat it; `.markdown-body th` alone is not enough. */
+.markdown-body table th,
+.markdown-body table td {
+  border: 1px solid #d4e5da;
+}
+
+.markdown-body th {
+  background: #e9f4ed;
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid #a9c9b5;
+  color: #657d70;
+}
+
+.markdown-body hr {
+  background-color: #d4e5da;
+}
+
+/* Mermaid paints fills into the SVG itself, so a stylesheet rule cannot reach
+   them: src/render.ts reads the palette and hands it over when it draws. These
+   diagrams already follow --code-bg (nodes), --border (edges) and --fg-muted
+   (arrows). Override the --diagram-* names to give them their own colours. */

@@ -145,5 +145,7 @@
   background-color: #ddd2bd;
 }
 
-/* Mermaid draws with its own light palette and ignores these variables. Its
-   default colours read fine on cream, so the SVG is left alone. */
+/* Mermaid paints fills into the SVG itself, so a stylesheet rule cannot reach
+   them: src/render.ts reads the palette and hands it over when it draws. These
+   diagrams already follow --code-bg (nodes), --border (edges) and --fg-muted
+   (arrows). Override the --diagram-* names to give them their own colours. */

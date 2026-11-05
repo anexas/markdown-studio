@@ -235,14 +235,90 @@ async function loadMermaid(): Promise<typeof import("mermaid").default> {
   return mermaidModule;
 }
 
+/**
+ * Reads a CSS variable as a usable colour. Later names are fallbacks, and an unresolved
+ * `var()` chain is skipped rather than handed to Mermaid, which cannot parse it.
+ */
+function themeColor(...names: string[]): string {
+  const style = getComputedStyle(document.documentElement);
+  for (const name of names) {
+    const value = style.getPropertyValue(name).trim();
+    if (value && !value.includes("var(")) return value;
+  }
+  return "";
+}
+
+/**
+ * Mermaid writes its palette into the SVG as attributes, so a stylesheet cannot recolour a
+ * diagram — the colours have to be handed over at draw time. These are the `--diagram-*`
+ * variables, falling back to the theme's own palette when a stylesheet does not set them.
+ */
+function diagramThemeVariables(): Record<string, string> {
+  const bg = themeColor("--diagram-bg", "--bg") || "#ffffff";
+  const nodeBg = themeColor("--diagram-node-bg", "--code-bg", "--bg-elevated") || bg;
+  const nodeBorder = themeColor("--diagram-node-border", "--border") || "#d8dee4";
+  const nodeText = themeColor("--diagram-node-text", "--fg") || "#1f2328";
+  const line = themeColor("--diagram-line", "--fg-muted") || nodeText;
+  const text = themeColor("--diagram-text", "--fg") || nodeText;
+  const labelBg = themeColor("--diagram-label-bg", "--bg") || bg;
+  const clusterBg = themeColor("--diagram-cluster-bg", "--bg-elevated") || nodeBg;
+  const clusterBorder = themeColor("--diagram-cluster-border", "--border") || nodeBorder;
+  const noteBg = themeColor("--diagram-note-bg", "--code-bg") || nodeBg;
+  const noteBorder = themeColor("--diagram-note-border", "--border") || nodeBorder;
+  const accent = themeColor("--diagram-accent", "--accent") || nodeBorder;
+
+  return {
+    background: bg,
+    primaryColor: nodeBg,
+    primaryTextColor: nodeText,
+    primaryBorderColor: nodeBorder,
+    secondaryColor: clusterBg,
+    tertiaryColor: labelBg,
+    lineColor: line,
+    textColor: text,
+    mainBkg: nodeBg,
+    nodeBorder,
+    nodeTextColor: nodeText,
+    titleColor: text,
+    edgeLabelBackground: labelBg,
+    clusterBkg: clusterBg,
+    clusterBorder,
+    // Sequence diagrams name the same surfaces differently.
+    actorBkg: nodeBg,
+    actorBorder: nodeBorder,
+    actorTextColor: nodeText,
+    signalColor: line,
+    signalTextColor: text,
+    labelBoxBkgColor: nodeBg,
+    labelBoxBorderColor: nodeBorder,
+    labelTextColor: nodeText,
+    loopTextColor: text,
+    activationBkgColor: clusterBg,
+    activationBorderColor: nodeBorder,
+    noteBkgColor: noteBg,
+    noteBorderColor: noteBorder,
+    noteTextColor: text,
+    // Pie slices have no semantic colour, so they walk the palette.
+    pie1: accent,
+    pie2: clusterBorder,
+    pie3: noteBorder,
+    pie4: line,
+    pieTitleTextSize: "16px",
+    pieSectionTextColor: nodeText,
+  };
+}
+
 /** Typesets one diagram and returns its SVG. Used by the preview and the rendered pane. */
 export async function renderMermaidSvg(source: string): Promise<string> {
   const mermaid = await loadMermaid();
   mermaid.initialize({
     startOnLoad: false,
     securityLevel: "strict",
-    theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default",
-    fontFamily: '"Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif',
+    // "base" applies the variables below as-is; the stock light/dark themes ignore them.
+    theme: "base",
+    themeVariables: diagramThemeVariables(),
+    fontFamily:
+      themeColor("--font-ui") || '"Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif',
     suppressErrorRendering: true,
   });
   mermaidCounter += 1;
