@@ -1,6 +1,6 @@
 # Theme files
 
-Eight ready-to-use stylesheets for **Preferences → Custom CSS theme**, plus the
+Twelve ready-to-use stylesheets for **Preferences → Custom CSS theme**, plus the
 notes needed to write your own. They live outside `src/`, so nothing here is
 bundled into the app: edit a file and re-apply it, and the running editor picks
 it up without a rebuild.
@@ -15,6 +15,10 @@ it up without a rebuild.
 | `mint-meadow.css` | Pale green | Cool green accents on a bright page |
 | `peach-sorbet.css` | Warm peach | Amber accents, soft borders |
 | `sakura-bloom.css` | Rose | Pink accents with muted prose |
+| `duotone-lavender.css` | Lavender, follows the Windows setting | A pastel tint in both schemes |
+| `duotone-peach.css` | Peach, follows the Windows setting | Warm tint, one palette per scheme |
+| `duotone-sage.css` | Sage green, follows the Windows setting | Cool green in both schemes |
+| `duotone-sky.css` | Sky blue, follows the Windows setting | Blue tint that stays legible in dark |
 
 ## Applying one
 

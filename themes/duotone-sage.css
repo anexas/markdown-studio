@@ -1,0 +1,139 @@
+/* ============================================================================
+   duotone-sage.css — Pastel Sage variant
+   ============================================================================ */
+
+.markdown-body {
+  line-height: 1.68;
+}
+
+#preview.markdown-body {
+  font-size: calc(15.5px * var(--text-scale));
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  border-bottom: 1px solid;
+  font-weight: 650;
+}
+
+/* Light scheme --------------------------------------------------------------- */
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+
+    --bg: #f6f8f6;
+    --bg-chrome: #eaeede;
+    --bg-elevated: #ffffff;
+    --fg: #2c332e;
+    --fg-muted: #616e63;
+    --border: #d4ded5;
+    --accent: #52796f;
+    --accent-soft: rgba(82, 121, 111, 0.12);
+    --hover: rgba(44, 51, 46, 0.05);
+
+    --code-bg: #edf2ee;
+    --quote: #616e63;
+  }
+
+  .markdown-body,
+  #preview .ProseMirror {
+    color: #2c332e;
+    background: #f6f8f6;
+  }
+
+  .markdown-body a {
+    color: #52796f;
+  }
+
+  .markdown-body h1,
+  .markdown-body h2 {
+    border-bottom-color: #d4ded5;
+  }
+
+  .markdown-body code,
+  .markdown-body pre,
+  .hljs {
+    background: #edf2ee;
+    color: #353d37;
+  }
+
+  .markdown-body pre {
+    border: 1px solid #dce5dd;
+  }
+
+  .markdown-body table th,
+  .markdown-body table td {
+    border: 1px solid #d4ded5;
+  }
+
+  .markdown-body th {
+    background: #edf2ee;
+  }
+
+  .markdown-body blockquote {
+    border-left-color: #d4ded5;
+    color: #616e63;
+  }
+}
+
+/* Dark scheme ---------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --bg: #141c17;
+    --bg-chrome: #1b261f;
+    --bg-elevated: #212e27;
+    --fg: #d2ded7;
+    --fg-muted: #83968b;
+    --border: #28382f;
+    --accent: #84a98c;
+    --accent-soft: rgba(132, 169, 140, 0.18);
+    --hover: rgba(255, 255, 255, 0.06);
+
+    --code-bg: #1a241e;
+    --quote: #83968b;
+  }
+
+  .markdown-body,
+  #preview .ProseMirror {
+    color: #d2ded7;
+    background: #141c17;
+  }
+
+  .markdown-body a {
+    color: #84a98c;
+  }
+
+  .markdown-body h1,
+  .markdown-body h2 {
+    border-bottom-color: #28382f;
+  }
+
+  .markdown-body code,
+  .markdown-body pre,
+  .hljs {
+    background: #1a241e;
+    color: #d2ded7;
+  }
+
+  .markdown-body pre {
+    border: 1px solid #28382f;
+  }
+
+  .markdown-body table th,
+  .markdown-body table td {
+    border: 1px solid #28382f;
+  }
+
+  .markdown-body th {
+    background: #1a241e;
+  }
+
+  .markdown-body blockquote {
+    border-left-color: #314539;
+    color: #83968b;
+  }
+}

@@ -1,0 +1,139 @@
+/* ============================================================================
+   duotone-lavender.css — Pastel Lavender variant
+   ============================================================================ */
+
+.markdown-body {
+  line-height: 1.68;
+}
+
+#preview.markdown-body {
+  font-size: calc(15.5px * var(--text-scale));
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  border-bottom: 1px solid;
+  font-weight: 650;
+}
+
+/* Light scheme --------------------------------------------------------------- */
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+
+    --bg: #f9f8fb;
+    --bg-chrome: #f0eef4;
+    --bg-elevated: #ffffff;
+    --fg: #312e38;
+    --fg-muted: #6c6475;
+    --border: #dfd8e6;
+    --accent: #6c5ce7;
+    --accent-soft: rgba(108, 92, 231, 0.1);
+    --hover: rgba(49, 46, 56, 0.05);
+
+    --code-bg: #f4f1f8;
+    --quote: #6c6475;
+  }
+
+  .markdown-body,
+  #preview .ProseMirror {
+    color: #312e38;
+    background: #f9f8fb;
+  }
+
+  .markdown-body a {
+    color: #6c5ce7;
+  }
+
+  .markdown-body h1,
+  .markdown-body h2 {
+    border-bottom-color: #dfd8e6;
+  }
+
+  .markdown-body code,
+  .markdown-body pre,
+  .hljs {
+    background: #f4f1f8;
+    color: #3a3542;
+  }
+
+  .markdown-body pre {
+    border: 1px solid #e7e2ee;
+  }
+
+  .markdown-body table th,
+  .markdown-body table td {
+    border: 1px solid #dfd8e6;
+  }
+
+  .markdown-body th {
+    background: #f4f1f8;
+  }
+
+  .markdown-body blockquote {
+    border-left-color: #dfd8e6;
+    color: #6c6475;
+  }
+}
+
+/* Dark scheme ---------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --bg: #16141c;
+    --bg-chrome: #1e1b26;
+    --bg-elevated: #252230;
+    --fg: #e2ddef;
+    --fg-muted: #988fb0;
+    --border: #332e42;
+    --accent: #a29bfe;
+    --accent-soft: rgba(162, 155, 254, 0.18);
+    --hover: rgba(255, 255, 255, 0.06);
+
+    --code-bg: #1c1924;
+    --quote: #988fb0;
+  }
+
+  .markdown-body,
+  #preview .ProseMirror {
+    color: #e2ddef;
+    background: #16141c;
+  }
+
+  .markdown-body a {
+    color: #a29bfe;
+  }
+
+  .markdown-body h1,
+  .markdown-body h2 {
+    border-bottom-color: #332e42;
+  }
+
+  .markdown-body code,
+  .markdown-body pre,
+  .hljs {
+    background: #1c1924;
+    color: #e2ddef;
+  }
+
+  .markdown-body pre {
+    border: 1px solid #332e42;
+  }
+
+  .markdown-body table th,
+  .markdown-body table td {
+    border: 1px solid #332e42;
+  }
+
+  .markdown-body th {
+    background: #1c1924;
+  }
+
+  .markdown-body blockquote {
+    border-left-color: #403852;
+    color: #988fb0;
+  }
+}
