@@ -1,0 +1,151 @@
+/* ============================================================================
+   duotone.css — follows Windows: warm off-white in light mode, deep navy in
+   dark mode, with one accent that shifts with the scheme.
+   ----------------------------------------------------------------------------
+   This is the theme to copy if you want your styling to track the system
+   setting instead of forcing a look.
+
+   The rule that matters: because a custom theme is the LAST stylesheet, any
+   colour declared outside an @media block beats the block's own value. So all
+   colours live inside the two scheme blocks below; only shape, size and
+   structure stay outside them.
+   ============================================================================ */
+
+/* Structure — identical in both schemes, so it is declared once. ------------ */
+
+.markdown-body {
+  line-height: 1.68;
+}
+
+#preview.markdown-body {
+  font-size: calc(15.5px * var(--text-scale)); /* keep the zoom multiplier */
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  border-bottom: 1px solid;
+  font-weight: 650;
+}
+
+/* Light scheme --------------------------------------------------------------- */
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+
+    --bg: #fffdf9;
+    --bg-chrome: #f4f1ea;
+    --bg-elevated: #ffffff;
+    --fg: #23272e;
+    --fg-muted: #626a75;
+    --border: #dfd9cc;
+    --accent: #23507a;
+    --accent-soft: rgba(35, 80, 122, 0.12);
+    --hover: rgba(35, 39, 46, 0.06);
+
+    --code-bg: #f2efe7;
+    --quote: #626a75;
+  }
+
+  .markdown-body,
+  #preview .ProseMirror {
+    color: #23272e;
+    background: #fffdf9;
+  }
+
+  .markdown-body a {
+    color: #23507a;
+  }
+
+  .markdown-body h1,
+  .markdown-body h2 {
+    border-bottom-color: #dfd9cc;
+  }
+
+  .markdown-body code,
+  .markdown-body pre,
+  .hljs {
+    background: #f2efe7;
+    color: #2a2f36;
+  }
+
+  .markdown-body pre {
+    border: 1px solid #e6e0d3;
+  }
+
+  .markdown-body table th,
+  .markdown-body table td {
+    border: 1px solid #dfd9cc;
+  }
+
+  .markdown-body th {
+    background: #f2efe7;
+  }
+
+  .markdown-body blockquote {
+    border-left-color: #dfd9cc;
+    color: #626a75;
+  }
+}
+
+/* Dark scheme ---------------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --bg: #0e1621;
+    --bg-chrome: #131d29;
+    --bg-elevated: #17212e;
+    --fg: #dbe4ef;
+    --fg-muted: #8b9aab;
+    --border: #24313f;
+    --accent: #62b0e8;
+    --accent-soft: rgba(98, 176, 232, 0.18);
+    --hover: rgba(255, 255, 255, 0.06);
+
+    --code-bg: #15202c;
+    --quote: #8b9aab;
+  }
+
+  .markdown-body,
+  #preview .ProseMirror {
+    color: #dbe4ef;
+    background: #0e1621;
+  }
+
+  .markdown-body a {
+    color: #62b0e8;
+  }
+
+  .markdown-body h1,
+  .markdown-body h2 {
+    border-bottom-color: #24313f;
+  }
+
+  /* app.css hard-codes the light .hljs palette, so the block is restated. */
+  .markdown-body code,
+  .markdown-body pre,
+  .hljs {
+    background: #15202c;
+    color: #cdd9e5;
+  }
+
+  .markdown-body pre {
+    border: 1px solid #24313f;
+  }
+
+  .markdown-body table th,
+  .markdown-body table td {
+    border: 1px solid #24313f;
+  }
+
+  .markdown-body th {
+    background: #15202c;
+  }
+
+  .markdown-body blockquote {
+    border-left-color: #2c3d4d;
+    color: #8b9aab;
+  }
+}

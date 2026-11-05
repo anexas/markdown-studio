@@ -1,0 +1,135 @@
+/* ============================================================================
+   midnight.css — dark slate with cool accents.
+   ----------------------------------------------------------------------------
+   Forces a DARK look even when Windows is in light mode (color-scheme below).
+   Same three sections as every theme here: chrome, document text, details.
+
+   Apply with: Preferences → Custom CSS theme → Browse… → this file → OK.
+   ============================================================================ */
+
+/* 1. Chrome ------------------------------------------------------------------ */
+:root {
+  color-scheme: dark; /* without this, scrollbars and checkboxes stay light */
+
+  --bg: #0f1417;
+  --bg-chrome: #151b1f;
+  --bg-elevated: #182024;
+  --fg: #d6e2e6;
+  --fg-muted: #93a3aa;
+  --border: #24323a;
+  --accent: #66c2ff;
+  --accent-soft: rgba(102, 194, 255, 0.16);
+  --hover: rgba(255, 255, 255, 0.06);
+
+  /* Export-only names. */
+  --code-bg: #16212a;
+  --quote: #93a3aa;
+}
+
+/* 2. Document text -----------------------------------------------------------
+   github-markdown-css supplies the pane colours and has no idea about the
+   variables above, so they are repeated for the document surfaces. */
+.markdown-body,
+#preview .ProseMirror {
+  color: #d6e2e6;
+  background: #0f1417;
+}
+
+.markdown-body {
+  line-height: 1.65;
+}
+
+#preview.markdown-body {
+  font-size: calc(15px * var(--text-scale)); /* keep the zoom multiplier */
+}
+
+/* 3. Details ----------------------------------------------------------------- */
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  color: #eaf4f8;
+  border-bottom-color: #24323a;
+}
+
+.markdown-body a {
+  color: #66c2ff;
+}
+
+.markdown-body strong {
+  color: #f2fbff;
+}
+
+/* Code — app.css hard-codes a LIGHT .hljs block; leaving it alone is what makes
+   most “dark themes” look broken. The block is restated here, then the tokens. */
+.markdown-body code,
+.markdown-body pre,
+.hljs {
+  background: #16212a;
+  color: #cfdde3;
+  font-family: "Cascadia Mono", Consolas, ui-monospace, monospace;
+}
+
+.markdown-body pre {
+  border: 1px solid #24323a;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #7d9099;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in {
+  color: #c792ea;
+}
+
+.hljs-string,
+.hljs-attr,
+.hljs-template-variable {
+  color: #9ece6a;
+}
+
+.hljs-number,
+.hljs-literal {
+  color: #f7768e;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-name {
+  color: #7dcfff;
+}
+
+/* Tables, quotes, rules. */
+.markdown-body table {
+  border-color: #24323a;
+}
+
+/* GitHub styles tables with `.markdown-body table th`, so a theme must match
+   that shape to beat it; `.markdown-body th` alone is not enough. */
+.markdown-body table th,
+.markdown-body table td {
+  border: 1px solid #24323a;
+}
+
+.markdown-body th {
+  background: #16212a;
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid #2d4250;
+  color: #a7b6bd;
+}
+
+.markdown-body hr {
+  background-color: #24323a;
+}
+
+/* Mermaid renders its own light-palette SVG, which is why diagrams stay light on
+   a dark page. Mermaid cannot be recoloured through CSS variables; forcing it
+   would take a filter, which distorts its semantic colours, so it is left as is:
+     .mermaid-diagram svg { filter: invert(0.9) hue-rotate(180deg); }
+*/

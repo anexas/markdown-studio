@@ -1,0 +1,130 @@
+/* ============================================================================
+   high-contrast.css — maximum legibility: black on white, heavier rules,
+   underlined links, slightly larger text.
+   ----------------------------------------------------------------------------
+   This one changes more than colour: it is the example to read if you want to
+   know how to alter weight, borders and type size rather than just palette.
+
+   Apply with: Preferences → Custom CSS theme → Browse… → this file → OK.
+   ============================================================================ */
+
+/* 1. Chrome ------------------------------------------------------------------ */
+:root {
+  color-scheme: light;
+
+  --bg: #ffffff;
+  --bg-chrome: #f0f0f0;
+  --bg-elevated: #ffffff;
+  --fg: #000000;
+  --fg-muted: #333333;
+  --border: #000000;
+  --accent: #0033cc;
+  --accent-soft: rgba(0, 51, 204, 0.12);
+  --hover: rgba(0, 0, 0, 0.08);
+
+  /* Export-only names. */
+  --code-bg: #ffffff;
+  --quote: #000000;
+}
+
+/* 2. Document text -----------------------------------------------------------
+   Bigger text is expressed with var(--text-scale) so zoom keeps working: a
+   hard-coded px size here would silently disable Ctrl+/- in the panes. */
+.markdown-body,
+#preview .ProseMirror {
+  color: #000000;
+  background: #ffffff;
+  font-size: calc(17px * var(--text-scale));
+  line-height: 1.75;
+}
+
+#preview.markdown-body {
+  font-size: calc(17px * var(--text-scale));
+}
+
+/* 3. Details ----------------------------------------------------------------- */
+
+/* Internet Explorer-era advice, and still the single best readability change:
+   never rely on colour alone to mark a link. */
+.markdown-body a {
+  color: #0033cc;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.markdown-body a:visited {
+  color: #4b0082;
+}
+
+.markdown-body h1,
+.markdown-body h2 {
+  border-bottom: 2px solid #000000;
+  font-weight: 800;
+}
+
+.markdown-body h3,
+.markdown-body h4 {
+  font-weight: 800;
+}
+
+.markdown-body strong {
+  font-weight: 800;
+}
+
+/* Code: white block, black 1px frame, so it cannot be mistaken for body text. */
+.markdown-body code,
+.markdown-body pre,
+.hljs {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  font-family: "Cascadia Mono", Consolas, ui-monospace, monospace;
+}
+
+.markdown-body pre code {
+  border: 0; /* the frame belongs to the block, not to the code inside it */
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #444444;
+  font-style: italic;
+}
+
+/* Tables get a heavier grid than the default 1px grey. */
+.markdown-body table {
+  border: 2px solid #000000;
+  border-collapse: collapse;
+}
+
+/* `.markdown-body table th` — GitHub's own selector — so the heavier grid wins. */
+.markdown-body table th,
+.markdown-body table td {
+  border: 1px solid #000000;
+  padding: 6px 10px;
+}
+
+.markdown-body th {
+  background: #f0f0f0;
+  font-weight: 800;
+}
+
+.markdown-body blockquote {
+  border-left: 4px solid #000000;
+  color: #000000;
+  font-style: italic;
+}
+
+.markdown-body hr {
+  border: 0;
+  border-top: 2px solid #000000;
+  background: none;
+}
+
+/* Focus rings are part of contrast too: thick, and never removed. */
+.tool-btn:focus-visible,
+.btn:focus-visible,
+.pref-input:focus-visible {
+  outline: 3px solid #0033cc;
+  outline-offset: 1px;
+}

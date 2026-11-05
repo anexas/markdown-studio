@@ -1,0 +1,149 @@
+/* ============================================================================
+   paper.css — warm cream, serif, for long reading sessions.
+   ----------------------------------------------------------------------------
+   This theme forces a LIGHT look even when Windows is set to dark (color-scheme
+   below). See duotone.css for the version that follows Windows instead.
+
+   Every theme in this folder has the same three sections:
+     1. Chrome variables — toolbar, tabs, sidebar, status bar
+     2. Document text    — the panes and the exported page
+     3. Details          — code, tables, quotes, links, headings
+
+   Apply with: Preferences → Custom CSS theme → Browse… → this file → OK.
+   ============================================================================ */
+
+/* 1. Chrome ------------------------------------------------------------------
+   These variables are read by src/styles/app.css. --code-bg and --quote are
+   read only by the export stylesheet, so setting them here also themes the
+   standalone HTML export. */
+:root {
+  color-scheme: light; /* dark scrollbars and form controls would look wrong on cream */
+
+  --bg: #fbf7ee;
+  --bg-chrome: #f2ecdf;
+  --bg-elevated: #fffdf8;
+  --fg: #2b2620;
+  --fg-muted: #6d6355;
+  --border: #ddd2bd;
+  --accent: #8a4b08;
+  --accent-soft: rgba(138, 75, 8, 0.14);
+  --hover: rgba(43, 38, 32, 0.06);
+
+  /* Export-only names. */
+  --code-bg: #f4ecdd;
+  --quote: #6d6355;
+}
+
+/* 2. Document text -----------------------------------------------------------
+   The panes get their colours from github-markdown-css, which does not read the
+   variables above — so the colours are repeated here.
+     #preview.markdown-body  → the read-only preview pane
+     #preview .ProseMirror   → the pane you type in
+     .markdown-body          → the exported page, and the preview container */
+.markdown-body,
+#preview .ProseMirror {
+  color: #2b2620;
+  background: #fbf7ee;
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+}
+
+.markdown-body {
+  line-height: 1.72;
+}
+
+#preview.markdown-body {
+  /* Keep var(--text-scale): it is how Ctrl+/- zooms, so never hard-code px here. */
+  font-size: calc(16px * var(--text-scale));
+}
+
+/* 3. Details ----------------------------------------------------------------- */
+
+.markdown-body h1,
+.markdown-body h2 {
+  border-bottom: 1px solid #ddd2bd;
+  font-weight: 600;
+}
+
+.markdown-body h1 {
+  color: #6f3b06;
+}
+
+.markdown-body h2 {
+  color: #5e441f;
+}
+
+.markdown-body a {
+  color: #8a4b08;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.markdown-body strong {
+  color: #4a2a08;
+}
+
+/* Code. app.css hard-codes a light GitHub palette for .hljs, so a theme has to
+   restate the block background, the base colour and any token it changes. */
+.markdown-body code,
+.markdown-body pre,
+.hljs {
+  background: #f4ecdd;
+  color: #352e26;
+  font-family: "Cascadia Mono", Consolas, ui-monospace, monospace;
+}
+
+.markdown-body pre {
+  border: 1px solid #e7dcc7;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #8a7c66;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in {
+  color: #8a4b08;
+}
+
+.hljs-string,
+.hljs-attr,
+.hljs-template-variable {
+  color: #4a6b3f;
+}
+
+.hljs-number,
+.hljs-literal {
+  color: #9a4a2f;
+}
+
+/* Tables and quotes. */
+.markdown-body table {
+  border-color: #ddd2bd;
+}
+
+/* `table th` — GitHub's stylesheet uses two element selectors, so matching that
+   shape is what lets a theme's border win. Plain `.markdown-body th` loses. */
+.markdown-body table th,
+.markdown-body table td {
+  border: 1px solid #ddd2bd;
+}
+
+.markdown-body th {
+  background: #f4ecdd;
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid #d9c9a9;
+  color: #6d6355;
+}
+
+.markdown-body hr {
+  background-color: #ddd2bd;
+}
+
+/* Mermaid draws with its own light palette and ignores these variables. Its
+   default colours read fine on cream, so the SVG is left alone. */
