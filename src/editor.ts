@@ -3,7 +3,7 @@ import type { Extension } from "@codemirror/state";
 import { EditorState } from "@codemirror/state";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { search, searchKeymap, openSearchPanel } from "@codemirror/search";
-import { syntaxHighlighting, HighlightStyle, bracketMatching, indentOnInput } from "@codemirror/language";
+import { syntaxHighlighting, HighlightStyle, bracketMatching, indentOnInput, syntaxTree } from "@codemirror/language";
 import { tags } from "@lezer/highlight";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
@@ -17,6 +17,26 @@ export interface EditorEnv {
 export interface EditorCallbacks {
   onDocChanged: () => void;
   onSelectionChanged: () => void;
+  /** Ctrl+click on a link in the source follows it, the way the rendered pane does. */
+  onOpenLink?: (href: string) => void;
+}
+
+/**
+ * The Markdown target under a position. Reading it from the syntax tree means the click can
+ * land anywhere inside `[text](target)`, not just on the characters of the target itself.
+ */
+function linkTargetAt(view: EditorView, pos: number): string | null {
+  let node = syntaxTree(view.state).resolveInner(pos, -1);
+  while (node.name !== "Link" && node.name !== "Image" && node.name !== "Autolink") {
+    if (!node.parent) return null;
+    node = node.parent;
+  }
+
+  const text = view.state.sliceDoc(node.from, node.to);
+  const autolink = /^<([^>\s]+)>$/.exec(text);
+  if (autolink) return autolink[1];
+  const inline = /\]\(\s*<?([^)\s>]+)>?/.exec(text);
+  return inline ? inline[1] : null;
 }
 
 /**
@@ -99,6 +119,19 @@ export function createEditor(host: HTMLElement, callbacks: EditorCallbacks): Edi
     keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap, indentWithTab]),
     markdown({ base: markdownLanguage, codeLanguages: languages }),
     EditorView.lineWrapping,
+    EditorView.domEventHandlers({
+      click(event, view) {
+        // A plain click places the caret; the modifier is what makes it a follow.
+        if (!event.ctrlKey && !event.metaKey) return false;
+        const at = view.posAtCoords({ x: event.clientX, y: event.clientY });
+        if (at === null) return false;
+        const href = linkTargetAt(view, at);
+        if (!href) return false;
+        event.preventDefault();
+        callbacks.onOpenLink?.(href);
+        return true;
+      },
+    }),
     sourceTheme,
     EditorView.updateListener.of((update) => {
       if (update.docChanged) callbacks.onDocChanged();

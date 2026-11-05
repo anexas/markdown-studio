@@ -530,15 +530,84 @@ async function openPath(path: string): Promise<void> {
   }
 }
 
+/** Splits a Markdown link into the file part and the `#fragment`, decoding `%20` and friends. */
+function linkTarget(href: string): { path: string; fragment: string } {
+  const cleaned = href.trim().replace(/^<|>$/g, "");
+  const hash = cleaned.indexOf("#");
+  const beforeHash = hash >= 0 ? cleaned.slice(0, hash) : cleaned;
+  const fragment = hash >= 0 ? cleaned.slice(hash + 1) : "";
+  const query = beforeHash.indexOf("?");
+  const file = query >= 0 ? beforeHash.slice(0, query) : beforeHash;
+  let decoded = file;
+  try {
+    decoded = decodeURI(file);
+  } catch {
+    // A stray `%` is not worth failing the whole link over.
+  }
+  return { path: decoded, fragment };
+}
+
 async function openResolved(dir: string, href: string): Promise<void> {
+  const target = href.trim();
+  // An absolute target already names the file; the document's folder is irrelevant.
+  if (/^(?:[a-zA-Z]:[\\/]|\\\\)/.test(target)) {
+    await openPath(target);
+    return;
+  }
   const sep = dir.includes("\\") ? "\\" : "/";
   const stack = dir.split(/[\\/]/).filter(Boolean);
-  for (const part of href.split(/[\\/]/)) {
+  for (const part of target.split(/[\\/]/)) {
     if (!part || part === ".") continue;
     if (part === "..") stack.pop();
     else stack.push(part);
   }
   await openPath(stack.join(sep));
+}
+
+/**
+ * Follows a link written in the document. Relative targets resolve against the file's own
+ * folder — the webview would otherwise resolve them against the app origin
+ * (`http://tauri.localhost/…`) and show a "File not found" page instead of opening the file.
+ */
+async function followLink(href: string): Promise<void> {
+  const trimmed = href.trim();
+  if (!trimmed) return;
+
+  if (/^(https?:|mailto:)/i.test(trimmed)) {
+    try {
+      await invoke("open_external", { url: trimmed });
+    } catch (err) {
+      await message(String(err), { title: "Blocked link", kind: "warning" });
+    }
+    return;
+  }
+
+  const { path, fragment } = linkTarget(trimmed);
+  if (!path) {
+    const target = fragment ? el.preview.querySelector(`[id="${CSS.escape(fragment)}"]`) : null;
+    target?.scrollIntoView({ block: "start", behavior: "smooth" });
+    return;
+  }
+
+  const doc = activeDoc();
+  if (!doc) return;
+  if (!doc.dir) {
+    await message(
+      "This document has not been saved yet, so a relative link has no folder to resolve against. Save it first, then the link opens the file it points at.",
+      { title: "Save the document first", kind: "info" },
+    );
+    return;
+  }
+
+  if (!isMarkdownPath(path)) {
+    await message(`Only Markdown links open inside the app.\n\n${path}`, {
+      title: "Not a Markdown file",
+      kind: "info",
+    });
+    return;
+  }
+
+  await openResolved(doc.dir, path);
 }
 
 async function stampOf(path: string): Promise<number | null> {
@@ -1458,6 +1527,7 @@ export async function initApp(): Promise<void> {
       scheduleAutosave();
     },
     onSelectionChanged: () => updateStatus(),
+    onOpenLink: (href) => void followLink(href),
   });
 
   env.view.scrollDOM.addEventListener("scroll", onEditorScroll, { passive: true });
@@ -1466,25 +1536,24 @@ export async function initApp(): Promise<void> {
     setPaneView(paneView === "preview" ? "rendered" : "preview");
   });
 
+  // Links inside the document are followed here, never by the webview: a relative href
+  // would otherwise resolve against the app origin and land on "File not found". The middle
+  // button and Ctrl+click arrive as `auxclick`/modified `click`, so both are covered.
   el.preview.addEventListener("click", (event) => {
     const anchor = (event.target as HTMLElement | null)?.closest("a");
     if (!anchor) return;
     const href = anchor.getAttribute("href") ?? "";
     if (!href) return;
     event.preventDefault();
-    const doc = activeDoc();
-    if (/^(https?:|mailto:)/i.test(href)) {
-      void invoke("open_external", { url: href }).catch((err: unknown) => {
-        void message(String(err), { title: "Blocked link", kind: "warning" });
-      });
-      return;
-    }
-    if (href.startsWith("#")) {
-      const target = el.preview.querySelector(`[id="${CSS.escape(href.slice(1))}"]`);
-      target?.scrollIntoView({ block: "start", behavior: "smooth" });
-      return;
-    }
-    if (doc?.dir && isMarkdownPath(href)) void openResolved(doc.dir, href);
+    void followLink(href);
+  });
+
+  el.preview.addEventListener("auxclick", (event) => {
+    if (event.button !== 1) return;
+    const anchor = (event.target as HTMLElement | null)?.closest("a");
+    if (!anchor) return;
+    event.preventDefault();
+    void followLink(anchor.getAttribute("href") ?? "");
   });
 
   document.getElementById("sidebar-close")?.addEventListener("click", () => setSidebarVisible(false));

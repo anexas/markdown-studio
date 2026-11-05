@@ -4,7 +4,7 @@ A lightweight Markdown editor for Windows 11: raw source on one side, rendered H
 the other, built with Tauri 2 (WebView2) so the installer stays small and no Chromium
 is bundled.
 
-Version 0.10.1 — per-machine MSI, registered as the default handler for `.md`.
+Version 0.10.2 — per-machine MSI, registered as the default handler for `.md`.
 
 ## Features
 
@@ -45,6 +45,9 @@ Version 0.10.1 — per-machine MSI, registered as the default handler for `.md`.
   embedded into HTML exports too.
 - **GFM rendering** — tables, task lists, footnotes, heading anchors, autolinks,
   fenced code with language highlighting.
+- **Relative links** — `[notes](notes.md)` opens the sibling file in a tab, resolved against
+  the document's own folder instead of the app origin; `#heading` scrolls the preview, `../`
+  and `%20` targets work, and `Ctrl+click` follows a link straight from the raw pane.
 - **Tabs** that are always visible, including the empty startup buffer, with dirty
   markers, middle-click close and session restore on relaunch. `Ctrl+N` reuses an
   untouched empty buffer instead of stacking identical Untitled tabs.
