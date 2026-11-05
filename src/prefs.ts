@@ -12,12 +12,18 @@ export interface Prefs {
   homeFolder: string | null;
   defaultMode: ViewMode;
   sidebarVisible: boolean;
+  /** Save existing files shortly after typing stops, without a dialog. */
+  autosave: boolean;
+  /** Stylesheet applied to the preview, rendered pane and HTML export. */
+  customCss: string | null;
 }
 
 export const DEFAULT_PREFS: Prefs = {
   homeFolder: null,
   defaultMode: "split",
   sidebarVisible: false,
+  autosave: true,
+  customCss: null,
 };
 
 /** True once the user has saved the dialog at least once. */
@@ -38,6 +44,9 @@ export function loadPrefs(): Prefs {
       homeFolder: typeof parsed.homeFolder === "string" && parsed.homeFolder.trim() ? parsed.homeFolder : null,
       defaultMode: parsed.defaultMode === "raw" || parsed.defaultMode === "preview" ? parsed.defaultMode : "split",
       sidebarVisible: parsed.sidebarVisible === true,
+      // Absent in preferences saved before autosave existed: those users get it turned on.
+      autosave: parsed.autosave !== false,
+      customCss: typeof parsed.customCss === "string" && parsed.customCss.trim() ? parsed.customCss : null,
     };
   } catch {
     return { ...DEFAULT_PREFS };

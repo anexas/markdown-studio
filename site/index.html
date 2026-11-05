@@ -6,7 +6,7 @@
     <title>Markdown Studio — a fast Markdown editor for Windows</title>
     <meta
       name="description"
-      content="A lightweight Markdown editor for Windows 11. Raw source on one side, a rendered pane you can type into on the other, in a 3 MB installer built with Tauri 2."
+      content="A lightweight Markdown editor for Windows 11. Raw source on one side, a rendered pane you can type into on the other, in a 5 MB installer built with Tauri 2."
     />
     <link rel="canonical" href="https://markdownstudio.saxenas.uk/" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
@@ -15,7 +15,7 @@
     <meta property="og:title" content="Markdown Studio — a fast Markdown editor for Windows" />
     <meta
       property="og:description"
-      content="Raw source on one side, a pane you can edit as rendered text on the other. Native Windows shell, 3 MB installer, MIT licensed."
+      content="Raw source on one side, a pane you can edit as rendered text on the other. Native Windows shell, 5 MB installer, MIT licensed."
     />
     <meta property="og:url" content="https://markdownstudio.saxenas.uk/" />
     <meta name="twitter:card" content="summary" />
@@ -561,7 +561,7 @@
             </a>
           </div>
           <p class="meta">
-            <span>Windows 10 and 11, 64-bit</span><span>3 MB installer</span><span>MIT licensed</span>
+            <span>Windows 10 and 11, 64-bit</span><span>5 MB installer</span><span>MIT licensed</span>
           </p>
 
           <div class="window" aria-hidden="true">
@@ -636,6 +636,31 @@ const editor = createEditor();
               </p>
             </div>
             <div class="card">
+              <h3>Maths and diagrams</h3>
+              <p>
+                <code>$E = mc^2$</code> inline and <code>$$ … $$</code> blocks are typeset with
+                KaTeX in the preview, the rendered pane and exports. A fenced block tagged
+                <code>mermaid</code> draws a flowchart or sequence diagram in place, and Mermaid
+                loads only when a document actually contains one.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Nothing gets lost</h3>
+              <p>
+                A saved file is written about a second after you stop typing, and before a tab or
+                the window closes. If another program rewrites the file, a clean tab follows it and
+                a tab with unsaved edits asks first — reload the file, or keep yours.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Export that stands alone</h3>
+              <p>
+                <kbd>Ctrl+Shift+E</kbd> writes one HTML page: styles inlined, images embedded,
+                maths typeset and diagrams drawn. Point Preferences at your own CSS file and the
+                pane and the page both pick it up.
+              </p>
+            </div>
+            <div class="card">
               <h3>GFM rendering</h3>
               <p>
                 Tables, task lists, footnotes, heading anchors and fenced code with language
@@ -702,6 +727,10 @@ const editor = createEditor();
               <tr>
                 <th scope="row">Rendered pane · edit or read-only</th>
                 <td><kbd>Ctrl+Alt+P</kbd></td>
+              </tr>
+              <tr>
+                <th scope="row">Export standalone HTML</th>
+                <td><kbd>Ctrl+Shift+E</kbd></td>
               </tr>
               <tr>
                 <th scope="row">New · Open · Open folder</th>

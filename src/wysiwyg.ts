@@ -13,12 +13,15 @@ import type { Mark, MarkSpec, Node as PmNode, NodeSpec } from "prosemirror-model
 import { EditorState, TextSelection } from "prosemirror-state";
 import type { Transaction } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import type { NodeViewConstructor } from "prosemirror-view";
+import type { NodeViewConstructor, ViewMutationRecord } from "prosemirror-view";
 import { Transform } from "prosemirror-transform";
 import { baseKeymap, toggleMark } from "prosemirror-commands";
 import { keymap } from "prosemirror-keymap";
 import { liftListItem, sinkListItem, splitListItem } from "prosemirror-schema-list";
 import { invoke } from "@tauri-apps/api/core";
+import katex from "katex";
+
+import { mathPlugin, renderMermaidSvg } from "./render";
 
 /* ------------------------------------------------------------------- schema */
 
@@ -64,6 +67,25 @@ const nodes: { [name: string]: NodeSpec } = {
     group: "block",
     parseDOM: [{ tag: "hr" }],
     toDOM: () => ["hr"],
+  },
+
+  /** `$tex$`. An atom: the formula is edited in the source pane, not inside the typeset box. */
+  math_inline: {
+    inline: true,
+    group: "inline",
+    atom: true,
+    attrs: { tex: { default: "" } },
+    toDOM: (node) => ["span", { class: "pm-math" }, String(node.attrs.tex ?? "")],
+    leafText: (node) => `$${String(node.attrs.tex ?? "")}$`,
+  },
+
+  /** `$$…$$` on its own lines. */
+  math_block: {
+    group: "block",
+    atom: true,
+    attrs: { tex: { default: "" } },
+    toDOM: (node) => ["div", { class: "pm-math pm-math-block" }, String(node.attrs.tex ?? "")],
+    leafText: (node) => `$$\n${String(node.attrs.tex ?? "")}\n$$`,
   },
 
   bullet_list: {
@@ -176,6 +198,8 @@ interface MdToken {
 }
 
 const parseMd = new MarkdownIt({ html: true, linkify: false, breaks: false, typographer: false });
+// Same maths rules as the preview, so `$…$` parses identically on both sides.
+mathPlugin(parseMd);
 
 /** Only link targets that cannot execute anything survive the round trip. */
 function safeHref(href: string | null): string | null {
@@ -198,6 +222,8 @@ function inlineMarkdownLength(child: PmNode): number {
       return 0;
     case "image":
       return 4 + String(child.attrs.alt ?? "").length + String(child.attrs.src ?? "").length;
+    case "math_inline":
+      return 2 + String(child.attrs.tex ?? "").length;
     default:
       return 1;
   }
@@ -232,6 +258,9 @@ function parseInline(children: MdToken[], fallback: string): PmNode[] {
         break;
       case "code_inline":
         addText(child.content, schema.marks.code.create());
+        break;
+      case "math_inline":
+        out.push(schema.nodes.math_inline.create({ tex: child.content }));
         break;
       case "strong_open":
         pushMark(schema.marks.strong.create());
@@ -405,6 +434,10 @@ export function parseMarkdown(source: string): PmNode {
         );
         break;
 
+      case "math_block":
+        push(schema.nodes.math_block.create({ tex: token.content }));
+        break;
+
       case "hr":
         push(schema.nodes.horizontal_rule.create());
         break;
@@ -530,6 +563,8 @@ function inlineNodeMarkdown(child: PmNode, skipTaskBox: boolean): string {
       const { src, alt, title } = child.attrs as { src: string; alt: string; title: string };
       return `![${alt ?? ""}](${src}${title ? ` "${title}"` : ""})`;
     }
+    case "math_inline":
+      return `$${String(child.attrs.tex ?? "")}$`;
     case "task_box":
       return skipTaskBox ? "" : `[${child.attrs.checked ? "x" : " "}] `;
     default:
@@ -671,6 +706,8 @@ function serializeBlock(node: PmNode): string {
       const lang = String(node.attrs.lang ?? "");
       return `\`\`\`${lang}\n${node.textContent}\n\`\`\``;
     }
+    case "math_block":
+      return `$$\n${String(node.attrs.tex ?? "")}\n$$`;
     case "horizontal_rule":
       return "---";
     case "bullet_list":
@@ -935,6 +972,141 @@ class TaskBoxView {
   }
 }
 
+class MathView {
+  dom: HTMLElement;
+  private display: boolean;
+
+  constructor(private node: PmNode) {
+    this.display = node.type.name === "math_block";
+    this.dom = document.createElement(this.display ? "div" : "span");
+    this.dom.className = this.display ? "pm-math pm-math-block" : "pm-math";
+    this.dom.contentEditable = "false";
+    this.draw();
+  }
+
+  update(node: PmNode): boolean {
+    if (node.type.name !== this.node.type.name) return false;
+    this.node = node;
+    this.draw();
+    return true;
+  }
+
+  ignoreMutation(): boolean {
+    return true;
+  }
+
+  private draw(): void {
+    const tex = String(this.node.attrs.tex ?? "");
+    this.dom.classList.remove("math-error");
+    try {
+      katex.render(tex, this.dom, {
+        displayMode: this.display,
+        throwOnError: false,
+        strict: "ignore",
+        trust: false,
+        output: "htmlAndMathml",
+      });
+    } catch {
+      this.dom.textContent = tex;
+      this.dom.classList.add("math-error");
+    }
+  }
+}
+
+/**
+ * Code blocks stay editable in place. A ```mermaid block also draws its diagram above the
+ * source, so the picture and the code that produced it travel together; editing the code
+ * redraws it after a short pause.
+ */
+class CodeBlockView {
+  dom: HTMLElement;
+  contentDOM: HTMLElement;
+  private diagram: HTMLElement;
+  private node: PmNode;
+  private generation = 0;
+  private timer = 0;
+
+  constructor(node: PmNode) {
+    this.node = node;
+    this.dom = document.createElement("div");
+    this.dom.className = "pm-code";
+
+    this.diagram = document.createElement("div");
+    this.diagram.className = "pm-diagram";
+    this.diagram.hidden = true;
+    this.dom.append(this.diagram);
+
+    const pre = document.createElement("pre");
+    pre.className = "hljs";
+    pre.dataset.lang = String(node.attrs.lang ?? "");
+    const code = document.createElement("code");
+    pre.append(code);
+    this.dom.append(pre);
+
+    this.contentDOM = code;
+    this.plan();
+  }
+
+  update(node: PmNode): boolean {
+    if (node.type.name !== "code_block") return false;
+    const langChanged = String(node.attrs.lang ?? "") !== String(this.node.attrs.lang ?? "");
+    this.node = node;
+    this.dom.querySelector("pre")?.setAttribute("data-lang", String(node.attrs.lang ?? ""));
+    if (langChanged) this.plan();
+    else if (this.isMermaid()) this.scheduleDraw();
+    return true;
+  }
+
+  ignoreMutation(mutation: ViewMutationRecord): boolean {
+    // Redrawing the diagram must not look like the user editing the code text.
+    return !this.contentDOM.contains(mutation.target);
+  }
+
+  private isMermaid(): boolean {
+    return String(this.node.attrs.lang ?? "").trim().toLowerCase() === "mermaid";
+  }
+
+  private plan(): void {
+    window.clearTimeout(this.timer);
+    if (!this.isMermaid()) {
+      this.diagram.hidden = true;
+      this.diagram.replaceChildren();
+      this.dom.classList.remove("pm-code-mermaid");
+      return;
+    }
+    this.dom.classList.add("pm-code-mermaid");
+    this.scheduleDraw();
+  }
+
+  private scheduleDraw(): void {
+    window.clearTimeout(this.timer);
+    this.timer = window.setTimeout(() => void this.draw(), 320);
+  }
+
+  private async draw(): Promise<void> {
+    const source = this.node.textContent;
+    if (!source.trim()) {
+      this.diagram.hidden = true;
+      return;
+    }
+
+    this.generation += 1;
+    const generation = this.generation;
+    try {
+      const svg = await renderMermaidSvg(source);
+      if (generation !== this.generation) return;
+      this.diagram.innerHTML = svg;
+      this.diagram.classList.remove("mermaid-error");
+      this.diagram.hidden = false;
+    } catch (err) {
+      if (generation !== this.generation) return;
+      this.diagram.textContent = `Diagram error: ${String(err).slice(0, 160)}`;
+      this.diagram.classList.add("mermaid-error");
+      this.diagram.hidden = false;
+    }
+  }
+}
+
 /* ------------------------------------------------------------------ factory */
 
 export interface WysiwygOptions {
@@ -963,6 +1135,9 @@ export function createWysiwyg(host: HTMLElement, initial: string, options: Wysiw
   const nodeViews: { [name: string]: NodeViewConstructor } = {
     image: (node) => new ImageView(node, ctx),
     task_box: (node, view, getPos) => new TaskBoxView(node, view, getPos),
+    math_inline: (node) => new MathView(node),
+    math_block: (node) => new MathView(node),
+    code_block: (node) => new CodeBlockView(node),
   };
 
   const plugins = [

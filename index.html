@@ -190,6 +190,11 @@
         <main id="main" class="main">
           <div id="tabstrip" class="tabstrip" role="tablist"></div>
           <nav id="breadcrumb" class="breadcrumb" aria-label="Open document path"></nav>
+          <div id="disk-banner" class="disk-banner" role="status" hidden>
+            <span id="disk-banner-text" class="disk-banner-text"></span>
+            <button type="button" id="disk-reload" class="btn">Reload from disk</button>
+            <button type="button" id="disk-keep" class="btn">Keep mine</button>
+          </div>
           <div id="workspace" class="workspace">
             <div id="editor-host" class="pane editor-pane"></div>
             <section class="pane preview-pane" aria-label="Rendered pane">
@@ -220,6 +225,7 @@
           </div>
           <footer id="statusbar" class="statusbar">
             <span id="stat-file" class="stat stat-file"></span>
+            <span id="stat-save" class="stat stat-save"></span>
             <span class="stat-spacer"></span>
             <span id="stat-cursor" class="stat"></span>
             <span id="stat-words" class="stat"></span>
@@ -256,6 +262,21 @@
           <div class="pref-block">
             <label class="pref-choice"><input id="prefs-sidebar" type="checkbox" /> <span>Show the folder sidebar when the app starts</span></label>
             <p class="pref-hint">Takes effect once a folder is open, here or from the last session.</p>
+          </div>
+
+          <div class="pref-block">
+            <label class="pref-choice"><input id="prefs-autosave" type="checkbox" /> <span>Save files automatically while I type</span></label>
+            <p class="pref-hint">Writes an already-saved file about a second after you stop typing; untitled documents still need Save.</p>
+          </div>
+
+          <div class="pref-block">
+            <span class="pref-label" id="prefs-css-label">Custom CSS theme</span>
+            <p class="pref-hint">A stylesheet applied to the preview, the rendered pane and HTML exports.</p>
+            <div class="pref-folder" role="group" aria-labelledby="prefs-css-label">
+              <input id="prefs-css" class="pref-input" type="text" readonly aria-labelledby="prefs-css-label" placeholder="None — built-in styles" />
+              <button type="button" id="prefs-css-browse" class="btn">Browse…</button>
+              <button type="button" id="prefs-css-clear" class="btn">Clear</button>
+            </div>
           </div>
 
           <p id="prefs-note" class="modal-hint">These are starting defaults. Changing the view or the sidebar while you work still applies for the rest of the session.</p>

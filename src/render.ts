@@ -1,9 +1,11 @@
 import MarkdownIt from "markdown-it";
+import type { StateBlock, StateInline } from "markdown-it";
 import anchor from "markdown-it-anchor";
 import footnote from "markdown-it-footnote";
 import taskLists from "markdown-it-task-lists";
 import hljs from "highlight.js/lib/common";
 import DOMPurify from "dompurify";
+import katex from "katex";
 import { invoke } from "@tauri-apps/api/core";
 
 function escapeHtml(value: string): string {
@@ -22,6 +24,113 @@ function slugify(title: string): string {
     .replace(/\s+/g, "-");
 }
 
+/* --------------------------------------------------------------------- maths */
+
+/**
+ * `$inline$` and `$$display$$` become placeholder elements, not KaTeX markup: the document
+ * is sanitized first, and only then is each placeholder replaced with KaTeX output. KaTeX
+ * needs inline styles for spacing, which the sanitizer removes on purpose, so rendering it
+ * before sanitizing would quietly break every formula.
+ */
+function mathInlineRule(state: StateInline, silent: boolean): boolean {
+  const start = state.pos;
+  if (state.src.charCodeAt(start) !== 0x24 /* $ */) return false;
+  if (state.src.charCodeAt(start + 1) === 0x24) return false; // display maths
+  if (start + 2 >= state.posMax) return false;
+
+  const first = state.src[start + 1];
+  // "$5 and $10" is prose, not a formula.
+  if (first === " " || first === "\t" || first === "\n") return false;
+
+  let end = start + 1;
+  while (end < state.posMax) {
+    const ch = state.src[end];
+    if (ch === "\\") {
+      end += 2;
+      continue;
+    }
+    if (ch === "$") break;
+    if (ch === "\n") return false;
+    end += 1;
+  }
+  if (end >= state.posMax) return false;
+
+  const inner = state.src.slice(start + 1, end);
+  if (!inner.trim() || /\s$/.test(inner)) return false;
+  const after = state.src[end + 1];
+  if (after && /[0-9]/.test(after)) return false;
+
+  if (silent) return true;
+  const token = state.push("math_inline", "math", 0);
+  token.markup = "$";
+  token.content = inner;
+  state.pos = end + 1;
+  return true;
+}
+
+function mathBlockRule(state: StateBlock, startLine: number, endLine: number, silent: boolean): boolean {
+  const start = state.bMarks[startLine] + state.tShift[startLine];
+  const max = state.eMarks[startLine];
+  if (start + 2 > max) return false;
+  if (state.src.slice(start, start + 2) !== "$$") return false;
+  if (silent) return true;
+
+  const body: string[] = [];
+  let next = startLine;
+  let closed = false;
+
+  const firstLine = state.src.slice(start + 2, max);
+  if (firstLine.trim().endsWith("$$") && firstLine.trim().length > 2) {
+    body.push(firstLine.trim().slice(0, -2));
+    closed = true;
+  } else {
+    body.push(firstLine);
+    while (next + 1 < endLine) {
+      next += 1;
+      const lineStart = state.bMarks[next] + Math.min(state.tShift[next], state.blkIndent);
+      const raw = state.src.slice(lineStart, state.eMarks[next]);
+      const trimmed = raw.trim();
+
+      if (trimmed.endsWith("$$")) {
+        body.push(trimmed.slice(0, -2));
+        closed = true;
+        break;
+      }
+      if (trimmed === "") {
+        body.push("");
+        continue;
+      }
+      if (state.tShift[next] < state.blkIndent) break;
+      body.push(raw);
+    }
+  }
+
+  // No closing $$: leave the lines to the normal paragraph rules rather than swallowing
+  // the rest of the document.
+  if (!closed) return false;
+
+  state.line = next + 1;
+  const token = state.push("math_block", "math", 0);
+  token.block = true;
+  token.map = [startLine, state.line];
+  token.content = body.join("\n").trim();
+  return true;
+}
+
+/** Registers the maths rules. Shared with the rendered pane's parser. */
+export function mathPlugin(mdInstance: MarkdownIt): void {
+  mdInstance.inline.ruler.before("backticks", "math_inline", mathInlineRule);
+  mdInstance.block.ruler.before("fence", "math_block", mathBlockRule, {
+    alt: ["paragraph", "reference", "blockquote", "list"],
+  });
+  mdInstance.renderer.rules.math_inline = (tokens, idx) =>
+    `<span class="math-src">${escapeHtml(tokens[idx].content)}</span>`;
+  mdInstance.renderer.rules.math_block = (tokens, idx) =>
+    `<div class="math-src math-display">${escapeHtml(tokens[idx].content)}</div>`;
+}
+
+/* ------------------------------------------------------------------ markdown */
+
 const md: MarkdownIt = new MarkdownIt({
   // Raw HTML is allowed (GitHub parity), but every rendered byte is sanitized below.
   html: true,
@@ -29,9 +138,14 @@ const md: MarkdownIt = new MarkdownIt({
   breaks: false,
   typographer: false,
   highlight(code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
+    const language = (lang ?? "").trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+    // Diagrams are drawn after sanitizing, so the block travels as escaped source text.
+    if (language === "mermaid") {
+      return `<pre class="hljs mermaid-src"><code>${escapeHtml(code)}</code></pre>`;
+    }
+    if (language && hljs.getLanguage(language)) {
       try {
-        return `<pre class="hljs"><code>${hljs.highlight(code, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
+        return `<pre class="hljs"><code>${hljs.highlight(code, { language, ignoreIllegals: true }).value}</code></pre>`;
       } catch {
         // fall through to the escaped version
       }
@@ -39,6 +153,8 @@ const md: MarkdownIt = new MarkdownIt({
     return `<pre class="hljs"><code>${escapeHtml(code)}</code></pre>`;
   },
 });
+
+mathPlugin(md);
 
 md.use(footnote)
   .use(taskLists, { enabled: false, label: false })
@@ -81,10 +197,87 @@ export function renderToHtml(source: string): string {
   return DOMPurify.sanitize(md.render(source), SANITIZE_OPTIONS);
 }
 
+/* ----------------------------------------------------------------- hydration */
+
+/**
+ * Replaces maths placeholders with KaTeX output. Runs after sanitizing, on HTML the
+ * sanitizer has already accepted, and the TeX it reads is text content — never markup.
+ */
+export function hydrateMath(root: ParentNode): void {
+  root.querySelectorAll<HTMLElement>(".math-src").forEach((holder) => {
+    const tex = holder.textContent ?? "";
+    const display = holder.classList.contains("math-display");
+    try {
+      holder.innerHTML = katex.renderToString(tex, {
+        displayMode: display,
+        throwOnError: false,
+        strict: "ignore",
+        trust: false,
+        output: "htmlAndMathml",
+      });
+      holder.classList.remove("math-src");
+      holder.classList.add("math-rendered");
+    } catch {
+      holder.classList.add("math-error");
+      holder.title = "This formula could not be typeset";
+    }
+  });
+}
+
+let mermaidCounter = 0;
+let mermaidModule: Promise<typeof import("mermaid").default> | null = null;
+
+/** Mermaid is by far the largest dependency here, so it is fetched on first use. */
+async function loadMermaid(): Promise<typeof import("mermaid").default> {
+  if (!mermaidModule) {
+    mermaidModule = import("mermaid").then((mod) => mod.default);
+  }
+  return mermaidModule;
+}
+
+/** Typesets one diagram and returns its SVG. Used by the preview and the rendered pane. */
+export async function renderMermaidSvg(source: string): Promise<string> {
+  const mermaid = await loadMermaid();
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: "strict",
+    theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default",
+    fontFamily: '"Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif',
+    suppressErrorRendering: true,
+  });
+  mermaidCounter += 1;
+  const { svg } = await mermaid.render(`mermaid-${mermaidCounter}`, source);
+  return svg;
+}
+
+/** Draws every ```mermaid block in place. */
+export async function hydrateMermaid(root: ParentNode): Promise<void> {
+  const blocks = Array.from(root.querySelectorAll<HTMLElement>("pre.mermaid-src"));
+  if (blocks.length === 0) return;
+
+  for (const block of blocks) {
+    const source = block.textContent ?? "";
+    if (!source.trim()) continue;
+    try {
+      const svg = await renderMermaidSvg(source);
+      const holder = document.createElement("div");
+      holder.className = "mermaid-diagram";
+      holder.innerHTML = svg;
+      block.replaceWith(holder);
+    } catch (err) {
+      // Keep the source visible: a broken diagram should still be readable and fixable.
+      block.classList.add("mermaid-error");
+      block.title = String(err);
+    }
+  }
+}
+
 const IMAGE_BUDGET = 60;
 
-/** Post-processes sanitized preview HTML: images, task checkboxes, link routing. */
+/** Post-processes sanitized preview HTML: maths, diagrams, images, links. */
 export async function hydratePreview(root: HTMLElement, docDir: string | null): Promise<void> {
+  hydrateMath(root);
+
   root.querySelectorAll("article input, article .markdown-body input, input").forEach((el) => {
     if (el instanceof HTMLInputElement) {
       el.disabled = true;
@@ -95,6 +288,8 @@ export async function hydratePreview(root: HTMLElement, docDir: string | null): 
   root.querySelectorAll("a[href]").forEach((el) => {
     el.setAttribute("rel", "noreferrer noopener");
   });
+
+  await hydrateMermaid(root);
 
   if (!docDir) return;
 

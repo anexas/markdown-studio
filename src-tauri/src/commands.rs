@@ -8,6 +8,7 @@ use tauri_plugin_opener::OpenerExt;
 
 const MAX_DOCUMENT_BYTES: u64 = 20 * 1024 * 1024;
 const MAX_IMAGE_BYTES: u64 = 10 * 1024 * 1024;
+const MAX_STYLESHEET_BYTES: u64 = 512 * 1024;
 const MAX_TREE_CHILDREN: usize = 500;
 const MARKDOWN_EXTENSIONS: &[&str] = &["md", "markdown", "mdown", "mkd"];
 const SKIPPED_DIRECTORIES: &[&str] = &["node_modules", "target", "dist", "build", "vendor", "__pycache__"];
@@ -118,6 +119,11 @@ pub fn write_document(path: String, content: String, eol: String, bom: bool) -> 
         bytes.extend_from_slice(content.as_bytes());
     }
 
+    write_atomic(&file, &bytes)
+}
+
+/// Writes through a temporary file in the same directory, then renames over the target.
+fn write_atomic(file: &Path, bytes: &[u8]) -> Result<(), String> {
     let file_name = file
         .file_name()
         .and_then(|name| name.to_str())
@@ -127,19 +133,95 @@ pub fn write_document(path: String, content: String, eol: String, bom: bool) -> 
     {
         let mut handle = fs::File::create(&temp).map_err(|err| format!("Cannot write file: {err}"))?;
         handle
-            .write_all(&bytes)
+            .write_all(bytes)
             .map_err(|err| format!("Cannot write file: {err}"))?;
         handle
             .sync_all()
             .map_err(|err| format!("Cannot flush file: {err}"))?;
     }
 
-    fs::rename(&temp, &file).map_err(|err| {
+    fs::rename(&temp, file).map_err(|err| {
         let _ = fs::remove_file(&temp);
         format!("Cannot replace file: {err}")
     })?;
 
     Ok(())
+}
+
+/// Last-write time of a document in milliseconds, so the app can notice another program
+/// rewriting the file. `None` means the path is missing or unreadable.
+#[tauri::command]
+pub fn document_stamp(path: String) -> Option<u64> {
+    let meta = fs::metadata(Path::new(&path)).ok()?;
+    if !meta.is_file() {
+        return None;
+    }
+    meta.modified()
+        .ok()?
+        .duration_since(std::time::UNIX_EPOCH)
+        .ok()
+        .map(|since| since.as_millis() as u64)
+}
+
+/// Reads the user's custom stylesheet. CSS only, and small: it is applied to the preview,
+/// the rendered pane and the HTML export, not executed.
+#[tauri::command]
+pub fn read_stylesheet(path: String) -> Result<String, String> {
+    let file = PathBuf::from(&path);
+    let is_css = file
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| ext.eq_ignore_ascii_case("css"))
+        .unwrap_or(false);
+    if !is_css {
+        return Err("Pick a .css file".into());
+    }
+
+    let meta = fs::metadata(&file).map_err(|err| format!("Cannot open stylesheet: {err}"))?;
+    if !meta.is_file() {
+        return Err("That path is not a file".into());
+    }
+    if meta.len() > MAX_STYLESHEET_BYTES {
+        return Err(format!(
+            "Stylesheet is larger than {} KB",
+            MAX_STYLESHEET_BYTES / 1024
+        ));
+    }
+
+    let bytes = fs::read(&file).map_err(|err| format!("Cannot read stylesheet: {err}"))?;
+    String::from_utf8(bytes).map_err(|_| "Stylesheet is not UTF-8 text".to_string())
+}
+
+/// Writes a self-contained HTML export. The edited document stays Markdown, so this target
+/// is validated separately rather than going through `write_document`.
+#[tauri::command]
+pub fn export_html(path: String, html: String) -> Result<(), String> {
+    let file = PathBuf::from(&path);
+    let allowed = file
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| {
+            let lowered = ext.to_ascii_lowercase();
+            lowered == "html" || lowered == "htm"
+        })
+        .unwrap_or(false);
+    if !allowed {
+        return Err("An HTML export must end in .html or .htm".into());
+    }
+    if html.len() as u64 > MAX_DOCUMENT_BYTES {
+        return Err(format!(
+            "Export is larger than {} MB",
+            MAX_DOCUMENT_BYTES / (1024 * 1024)
+        ));
+    }
+
+    if let Some(parent) = file.parent() {
+        if !parent.as_os_str().is_empty() && !parent.exists() {
+            fs::create_dir_all(parent).map_err(|err| format!("Cannot create folder: {err}"))?;
+        }
+    }
+
+    write_atomic(&file, html.as_bytes())
 }
 
 /// Lists one directory level for the folder sidebar: sub-folders plus markdown files.
@@ -396,6 +478,36 @@ mod tests {
 
         let result = read_image(dir.to_string_lossy().to_string(), "pixel.png".into()).unwrap();
         assert!(result.starts_with("data:image/png;base64,"), "unexpected: {result}");
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn exports_html_and_rejects_markdown_targets() {
+        let dir = scratch("export");
+        let page = dir.join("page.html");
+        export_html(page.to_string_lossy().to_string(), "<!doctype html><p>x</p>".into()).unwrap();
+        assert!(fs::read_to_string(&page).unwrap().contains("<p>x</p>"));
+
+        let md = dir.join("page.md");
+        assert!(export_html(md.to_string_lossy().to_string(), "x".into()).is_err());
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn reads_css_only_and_stamps_files() {
+        let dir = scratch("style");
+        let css = dir.join("theme.css");
+        fs::write(&css, "body { color: red; }").unwrap();
+        let css_path = css.to_string_lossy().to_string();
+        assert_eq!(read_stylesheet(css_path.clone()).unwrap(), "body { color: red; }");
+
+        let js = dir.join("theme.js");
+        fs::write(&js, "alert(1)").unwrap();
+        assert!(read_stylesheet(js.to_string_lossy().to_string()).is_err());
+
+        let stamp = document_stamp(css_path).expect("an existing file has a stamp");
+        assert!(stamp > 0);
+        assert!(document_stamp(dir.join("missing.css").to_string_lossy().to_string()).is_none());
         let _ = fs::remove_dir_all(&dir);
     }
 

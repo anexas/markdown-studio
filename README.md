@@ -4,7 +4,7 @@ A lightweight Markdown editor for Windows 11: raw source on one side, rendered H
 the other, built with Tauri 2 (WebView2) so the installer stays small and no Chromium
 is bundled.
 
-Version 0.9.1 — per-machine MSI, registered as the default handler for `.md`.
+Version 0.10.0 — per-machine MSI, registered as the default handler for `.md`.
 
 ## Features
 
@@ -23,6 +23,25 @@ Version 0.9.1 — per-machine MSI, registered as the default handler for `.md`.
   session.
   Preview is the faithful read-only render — tables, raw HTML and footnotes look there
   exactly as they will print.
+- **Maths** — `$E = mc^2$` inline and `$$ … $$` blocks are typeset with KaTeX in Preview,
+  in the rendered pane and in HTML exports. A formula KaTeX cannot parse is left as its
+  source text instead of breaking the render. Currency such as `$5 and $10` is prose, not
+  maths.
+- **Mermaid diagrams** — a fenced block tagged `mermaid` draws a flowchart, sequence or
+  state diagram in place, in the preview and in the rendered pane. Mermaid is the largest
+  dependency in the app, so it is fetched only when a document actually contains one.
+- **Standalone HTML export** (`Ctrl+Shift+E`) — writes one self-contained page: styles
+  inlined, images embedded as data URLs, maths typeset and diagrams already drawn, so it
+  opens anywhere without the Markdown file or its assets.
+- **Autosave** — a file that already has a path is written about a second after typing
+  stops, and before a tab or the window closes. Untitled buffers still wait for Save. The
+  status bar says when it happens, and Preferences can turn it off.
+- **External change detection** — open files are watched. A tab with no unsaved edits
+  follows the file when another program rewrites it; a tab with edits shows a banner
+  offering **Reload from disk** or **Keep mine**, so neither version is discarded silently.
+- **Custom CSS themes** — choose a `.css` file in Preferences to restyle the preview, the
+  rendered pane and exports. The stylesheet is applied as written, so it can override any
+  built-in style, and it is embedded into HTML exports too.
 - **GFM rendering** — tables, task lists, footnotes, heading anchors, autolinks,
   fenced code with language highlighting.
 - **Tabs** that are always visible, including the empty startup buffer, with dirty
@@ -66,6 +85,7 @@ Version 0.9.1 — per-machine MSI, registered as the default handler for `.md`.
 | Cycle view · Raw · Split · Preview | `Ctrl+E` · `Ctrl+1` · `Ctrl+2` · `Ctrl+3` |
 | Rendered pane · read-only preview | `Ctrl+Alt+P` |
 | Folder sidebar / Reload folder tree | `Ctrl+Shift+B` · `Ctrl+Shift+F5` |
+| Export standalone HTML | `Ctrl+Shift+E` |
 | Zoom in / out / reset | `Ctrl+=` · `Ctrl+-` · `Ctrl+0` |
 | Find | `Ctrl+F` |
 | Bold / Italic / Link | `Ctrl+B` · `Ctrl+I` · `Ctrl+K` |
@@ -130,7 +150,9 @@ replacing a binary whose file version has not changed.
 | `src/wysiwyg.ts` | Editable rendered pane: schema, markdown parse/serialize, node views |
 | `src/sidebar.ts` | Lazy folder tree, reveal/expand tracking |
 | `src/session.ts` | localStorage session (tabs, mode, sidebar, zoom, recents) |
-| `src/prefs.ts` | Startup defaults (home folder, view mode, sidebar) |
+| `src/prefs.ts` | Startup defaults (home folder, view mode, sidebar, autosave, theme) |
+| `src/theme.ts` | Custom CSS theme loading and application |
+| `src/export.ts` | Standalone HTML export (styles, images, maths, diagrams) |
 | `src/styles/app.css` | Application chrome, panes, print stylesheet |
 | `src-tauri/src/commands.rs` | Validated file system commands |
 | `src-tauri/src/menu.rs` | Native menu bar |

@@ -17,6 +17,10 @@ export interface Doc {
   bom: boolean;
   /** Content as last read/written from disk; the dirty check compares against it. */
   savedContent: string;
+  /** Modification time seen on disk, used to notice another program writing the file. */
+  stamp: number | null;
+  /** The file changed on disk while this buffer had unsaved edits. */
+  conflict: boolean;
   /** Inactive buffers keep a full EditorState so undo history and cursor survive. */
   state: EditorState | null;
   editorScroll: number;

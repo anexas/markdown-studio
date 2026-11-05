@@ -9,6 +9,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let open_folder = MenuItem::with_id(app, "open-folder", "Open &Folder...", true, Some("CmdOrCtrl+Shift+O"))?;
     let save = MenuItem::with_id(app, "save", "&Save", true, Some("CmdOrCtrl+S"))?;
     let save_as = MenuItem::with_id(app, "save-as", "Save &As...", true, Some("CmdOrCtrl+Shift+S"))?;
+    let export_html = MenuItem::with_id(app, "export-html", "Export &HTML...", true, Some("CmdOrCtrl+Shift+E"))?;
     let close = MenuItem::with_id(app, "close", "&Close Tab", true, Some("CmdOrCtrl+W"))?;
     let print = MenuItem::with_id(app, "print", "&Print / Export PDF...", true, Some("CmdOrCtrl+P"))?;
     let preferences = MenuItem::with_id(app, "preferences", "&Preferences...", true, Some("CmdOrCtrl+,"))?;
@@ -21,6 +22,7 @@ pub fn build<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     file.append(&PredefinedMenuItem::separator(app)?)?;
     file.append(&save)?;
     file.append(&save_as)?;
+    file.append(&export_html)?;
     file.append(&PredefinedMenuItem::separator(app)?)?;
     file.append(&close)?;
     file.append(&print)?;

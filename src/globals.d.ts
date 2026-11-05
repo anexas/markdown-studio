@@ -1,3 +1,8 @@
+declare module "*.css?raw" {
+  const css: string;
+  export default css;
+}
+
 declare module "markdown-it-footnote" {
   import type MarkdownIt from "markdown-it";
   const plugin: MarkdownIt.PluginSimple;

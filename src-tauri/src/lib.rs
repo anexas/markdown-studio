@@ -33,6 +33,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::read_document,
             commands::write_document,
+            commands::document_stamp,
+            commands::read_stylesheet,
+            commands::export_html,
             commands::list_folder,
             commands::read_image,
             commands::open_external,

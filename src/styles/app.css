@@ -1122,3 +1122,122 @@ body[data-mode="preview"] .preview-pane {
 body[data-mode="split"] .preview-pane:focus-within {
   box-shadow: inset 0 0 0 1px var(--border);
 }
+
+/* ------------------------------------------------- autosave and disk changes */
+
+.stat-save {
+  color: var(--accent);
+}
+
+.stat-save.stat-error {
+  color: #cf222e;
+}
+
+.disk-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--accent-soft);
+  font-size: 12.5px;
+}
+
+.disk-banner[hidden] {
+  display: none;
+}
+
+.disk-banner-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.disk-banner .btn {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+/* -------------------------------------------------------- maths and diagrams */
+
+.math-display {
+  display: block;
+  margin: 1em 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.math-error {
+  color: #cf222e;
+  font-family: var(--font-mono);
+}
+
+.mermaid-diagram {
+  display: flex;
+  justify-content: center;
+  margin: 1em 0;
+}
+
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+pre.mermaid-error {
+  border: 1px solid #cf222e;
+}
+
+#preview .ProseMirror .pm-math {
+  white-space: normal;
+}
+
+#preview .ProseMirror .pm-math-block {
+  display: block;
+  margin: 1em 0;
+  text-align: center;
+}
+
+#preview .ProseMirror .pm-math.ProseMirror-selectednode {
+  outline: 2px solid var(--accent, #4c8dff);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+#preview .ProseMirror .pm-code {
+  margin: 1em 0;
+}
+
+#preview .ProseMirror .pm-code pre {
+  margin: 0;
+}
+
+#preview .ProseMirror .pm-diagram {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+#preview .ProseMirror .pm-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+#preview .ProseMirror .pm-diagram.mermaid-error {
+  justify-content: flex-start;
+  font: 12px/1.5 var(--font-mono);
+  color: #cf222e;
+}
+
+#preview .ProseMirror .pm-code-mermaid pre {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+@media print {
+  .disk-banner {
+    display: none !important;
+  }
+}

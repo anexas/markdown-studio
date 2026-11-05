@@ -30,6 +30,8 @@ import { Sidebar, isUnderRoot } from "./sidebar";
 import { ZOOM_MAX, ZOOM_MIN, clampWidth, clampZoom, loadSession, pushRecent, saveSession } from "./session";
 import { DEFAULT_PREFS, hasPrefs, loadPrefs, savePrefs } from "./prefs";
 import type { Prefs } from "./prefs";
+import { exportDocHtml } from "./export";
+import { applyCustomCss, clearCustomCss } from "./theme";
 import { baseName, dirName, isMarkdownPath } from "./types";
 import type { Doc, DocPayload, PaneView, ViewMode } from "./types";
 
@@ -55,6 +57,7 @@ const el = {
   sidebarTitle: must<HTMLElement>("sidebar-title"),
   tree: must<HTMLElement>("tree"),
   statFile: must<HTMLElement>("stat-file"),
+  statSave: must<HTMLElement>("stat-save"),
   statCursor: must<HTMLElement>("stat-cursor"),
   statWords: must<HTMLElement>("stat-words"),
   statEol: must<HTMLElement>("stat-eol"),
@@ -67,6 +70,14 @@ const el = {
   prefsBrowse: must<HTMLButtonElement>("prefs-browse"),
   prefsClear: must<HTMLButtonElement>("prefs-clear"),
   prefsSidebar: must<HTMLInputElement>("prefs-sidebar"),
+  prefsAutosave: must<HTMLInputElement>("prefs-autosave"),
+  prefsCss: must<HTMLInputElement>("prefs-css"),
+  prefsCssBrowse: must<HTMLButtonElement>("prefs-css-browse"),
+  prefsCssClear: must<HTMLButtonElement>("prefs-css-clear"),
+  diskBanner: must<HTMLElement>("disk-banner"),
+  diskBannerText: must<HTMLElement>("disk-banner-text"),
+  diskReload: must<HTMLButtonElement>("disk-reload"),
+  diskKeep: must<HTMLButtonElement>("disk-keep"),
   prefsSave: must<HTMLButtonElement>("prefs-save"),
   prefsCancel: must<HTMLButtonElement>("prefs-cancel"),
 };
@@ -83,7 +94,14 @@ let docSeq = 0;
 let zoom = 1;
 let prefs: Prefs = { ...DEFAULT_PREFS };
 let prefsHomeDraft: string | null = null;
+let prefsCssDraft: string | null = null;
 let prefsOpen = false;
+
+let autosaveTimer = 0;
+let diskTimer = 0;
+let saveStateTimer = 0;
+/** The buffer whose on-disk change is waiting for a decision. */
+let conflictDocId: string | null = null;
 
 const ZOOM_STEP = 0.1;
 
@@ -140,6 +158,8 @@ function makeDoc(content: string, path: string | null, eol: "\n" | "\r\n", bom: 
     eol,
     bom,
     savedContent: content,
+    stamp: null,
+    conflict: false,
     state: createState(content, env.extensions),
     editorScroll: 0,
     previewScroll: 0,
@@ -444,6 +464,8 @@ function persist(): void {
 function activate(index: number): void {
   if (index < 0 || index >= docs.length) return;
 
+  // Leaving a buffer is a natural save point: autosave should not wait for the timer.
+  flushAutosave();
   const current = activeDoc();
   if (current) {
     current.state = env.view.state;
@@ -468,6 +490,8 @@ function activate(index: number): void {
   renderBreadcrumb();
   updateStatus();
   void trackInSidebar(next.path);
+  if (next.conflict) showDiskBanner(next);
+  else hideDiskBanner();
   scheduleSessionSave();
 }
 
@@ -494,7 +518,9 @@ async function openPath(path: string): Promise<void> {
   }
   try {
     const payload = await invoke<DocPayload>("read_document", { path });
-    docs.push(makeDoc(payload.content, path, payload.eol === "\r\n" ? "\r\n" : "\n", payload.bom));
+    const doc = makeDoc(payload.content, path, payload.eol === "\r\n" ? "\r\n" : "\n", payload.bom);
+    doc.stamp = await stampOf(path);
+    docs.push(doc);
     activate(docs.length - 1);
     recent = pushRecent(recent, path);
     persist();
@@ -515,6 +541,45 @@ async function openResolved(dir: string, href: string): Promise<void> {
   await openPath(stack.join(sep));
 }
 
+async function stampOf(path: string): Promise<number | null> {
+  try {
+    return await invoke<number | null>("document_stamp", { path });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Writes a buffer to disk. `quiet` is autosave: no dialog, and a failure is reported in
+ * the status bar rather than interrupting with a modal the user did not ask for.
+ */
+async function writeDoc(doc: Doc, target: string, options: { quiet?: boolean } = {}): Promise<boolean> {
+  const content = contentOf(doc);
+  try {
+    await invoke("write_document", { path: target, content, eol: doc.eol, bom: doc.bom });
+    doc.path = target;
+    doc.name = baseName(target);
+    doc.dir = dirName(target);
+    doc.savedContent = content;
+    doc.stamp = await stampOf(target);
+    doc.conflict = false;
+    if (conflictDocId === doc.id) hideDiskBanner();
+    recent = pushRecent(recent, target);
+    renderTabs();
+    updateTitle();
+    renderBreadcrumb();
+    updateStatus();
+    persist();
+    await trackInSidebar(target);
+    if (options.quiet) showSaveState("Autosaved");
+    return true;
+  } catch (err) {
+    showSaveState("Save failed", true);
+    if (!options.quiet) await message(String(err), { title: "Could not save file", kind: "error" });
+    return false;
+  }
+}
+
 async function saveDoc(saveAs: boolean): Promise<void> {
   const doc = activeDoc();
   if (!doc) return;
@@ -532,22 +597,152 @@ async function saveDoc(saveAs: boolean): Promise<void> {
     target = chosen;
   }
 
-  const content = contentOf(doc);
+  await writeDoc(doc, target);
+}
+
+/* ------------------------------------------------------------------ autosave */
+
+const AUTOSAVE_DELAY = 1200;
+const DISK_POLL_MS = 2000;
+
+function scheduleAutosave(): void {
+  window.clearTimeout(autosaveTimer);
+  const doc = activeDoc();
+  if (!prefs.autosave || !doc?.path || doc.conflict || !isDirty(doc)) return;
+  autosaveTimer = window.setTimeout(() => void autosaveNow(), AUTOSAVE_DELAY);
+}
+
+async function autosaveNow(): Promise<void> {
+  const doc = activeDoc();
+  if (!doc?.path || doc.conflict || !isDirty(doc)) return;
+  await writeDoc(doc, doc.path, { quiet: true });
+}
+
+/** Saves the pending edit before the buffer is switched away or the window closes. */
+function flushAutosave(): void {
+  window.clearTimeout(autosaveTimer);
+  const doc = activeDoc();
+  if (!doc?.path || doc.conflict || !isDirty(doc)) return;
+  void writeDoc(doc, doc.path, { quiet: true });
+}
+
+/* ------------------------------------------------------- external changes */
+
+function showSaveState(text: string, isError = false): void {
+  el.statSave.textContent = text;
+  el.statSave.classList.toggle("stat-error", isError);
+  window.clearTimeout(saveStateTimer);
+  saveStateTimer = window.setTimeout(() => {
+    el.statSave.textContent = "";
+    el.statSave.classList.remove("stat-error");
+  }, isError ? 8000 : 2500);
+}
+
+function showDiskBanner(doc: Doc): void {
+  conflictDocId = doc.id;
+  el.diskBannerText.textContent = `${doc.name} changed on disk, and this tab has unsaved edits.`;
+  el.diskBanner.hidden = false;
+}
+
+function hideDiskBanner(): void {
+  conflictDocId = null;
+  el.diskBanner.hidden = true;
+}
+
+/** Re-reads a document another program wrote, keeping the caret where it was. */
+async function reloadDoc(doc: Doc): Promise<void> {
+  if (!doc.path) return;
   try {
-    await invoke("write_document", { path: target, content, eol: doc.eol, bom: doc.bom });
-    doc.path = target;
-    doc.name = baseName(target);
-    doc.dir = dirName(target);
-    doc.savedContent = content;
-    recent = pushRecent(recent, target);
+    const payload = await invoke<DocPayload>("read_document", { path: doc.path });
+    doc.eol = payload.eol === "\r\n" ? "\r\n" : "\n";
+    doc.bom = payload.bom;
+    doc.savedContent = payload.content;
+    doc.conflict = false;
+    doc.stamp = await stampOf(doc.path);
+
+    if (doc === activeDoc()) {
+      const caret = Math.min(env.view.state.selection.main.head, payload.content.length);
+      env.view.dispatch({
+        changes: { from: 0, to: env.view.state.doc.length, insert: payload.content },
+        selection: { anchor: caret },
+      });
+      scheduleRender(true);
+      updateTitle();
+      renderBreadcrumb();
+    } else if (doc.state) {
+      doc.state = createState(payload.content, env.extensions);
+    }
+
+    hideDiskBanner();
     renderTabs();
-    updateTitle();
-    renderBreadcrumb();
     updateStatus();
-    persist();
-    await trackInSidebar(target);
+    showSaveState("Reloaded from disk");
   } catch (err) {
-    await message(String(err), { title: "Could not save file", kind: "error" });
+    showSaveState("Reload failed", true);
+    await message(String(err), { title: `Could not reload ${doc.name}`, kind: "error" });
+  }
+}
+
+async function checkDisk(doc: Doc): Promise<void> {
+  if (!doc.path || doc.conflict) return;
+  const stamp = await stampOf(doc.path);
+  if (stamp === null) return;
+  if (doc.stamp === null) {
+    doc.stamp = stamp;
+    return;
+  }
+  if (stamp === doc.stamp) return;
+
+  doc.stamp = stamp;
+  // A clean buffer has nothing to lose: follow the file. A dirty one is a decision for
+  // the user, so the banner waits instead of quietly discarding their edits.
+  if (!isDirty(doc)) {
+    await reloadDoc(doc);
+    return;
+  }
+
+  doc.conflict = true;
+  renderTabs();
+  if (doc === activeDoc()) showDiskBanner(doc);
+}
+
+async function pollDisk(): Promise<void> {
+  const open = docs.filter((doc) => doc.path !== null && !doc.conflict);
+  if (open.length === 0) return;
+  await Promise.all(open.map((doc) => checkDisk(doc)));
+}
+
+function startDiskWatch(): void {
+  window.clearInterval(diskTimer);
+  diskTimer = window.setInterval(() => void pollDisk(), DISK_POLL_MS);
+}
+
+/* -------------------------------------------------------------- html export */
+
+async function exportHtmlDoc(): Promise<void> {
+  const doc = activeDoc();
+  if (!doc) return;
+  try {
+    const written = await exportDocHtml(doc, contentOf(doc));
+    if (written) showSaveState("Exported HTML");
+  } catch (err) {
+    await message(String(err), { title: "Could not export HTML", kind: "error" });
+  }
+}
+
+/* --------------------------------------------------------------------- theme */
+
+async function applyTheme(path: string | null): Promise<void> {
+  if (!path) {
+    clearCustomCss();
+    return;
+  }
+  const failure = await applyCustomCss(path);
+  if (failure) {
+    await message(`The theme could not be loaded:\n\n${failure}`, {
+      title: "Custom CSS unavailable",
+      kind: "warning",
+    });
   }
 }
 
@@ -713,6 +908,9 @@ function openPreferences(): void {
   el.prefsHome.value = prefsHomeDraft ?? "";
   setPrefMode(prefs.defaultMode);
   el.prefsSidebar.checked = prefs.sidebarVisible;
+  el.prefsAutosave.checked = prefs.autosave;
+  prefsCssDraft = prefs.customCss;
+  el.prefsCss.value = prefsCssDraft ?? "";
   el.prefsBackdrop.hidden = false;
   // `inert` keeps Tab and screen readers inside the dialog without a hand-rolled trap.
   el.shell.inert = true;
@@ -744,8 +942,16 @@ async function savePreferences(): Promise<void> {
     }
   }
 
-  prefs = { homeFolder: home, defaultMode: chosenMode(), sidebarVisible: el.prefsSidebar.checked };
+  prefs = {
+    homeFolder: home,
+    defaultMode: chosenMode(),
+    sidebarVisible: el.prefsSidebar.checked,
+    autosave: el.prefsAutosave.checked,
+    customCss: prefsCssDraft,
+  };
   savePrefs(prefs);
+  await applyTheme(prefs.customCss);
+  scheduleAutosave();
 
   setMode(prefs.defaultMode);
 
@@ -793,6 +999,26 @@ function installPreferences(): void {
     el.prefsHome.value = "";
   });
 
+  el.prefsCssBrowse.addEventListener("click", () => {
+    void (async () => {
+      const chosen = await openDialog({
+        title: "Choose a CSS theme",
+        directory: false,
+        multiple: false,
+        defaultPath: prefsCssDraft ?? undefined,
+        filters: [{ name: "Stylesheet", extensions: ["css"] }],
+      });
+      if (typeof chosen !== "string") return;
+      prefsCssDraft = chosen;
+      el.prefsCss.value = chosen;
+    })();
+  });
+
+  el.prefsCssClear.addEventListener("click", () => {
+    prefsCssDraft = null;
+    el.prefsCss.value = "";
+  });
+
   el.prefsCancel.addEventListener("click", closePreferences);
   el.prefsSave.addEventListener("click", () => void savePreferences());
 
@@ -830,6 +1056,9 @@ function runAction(id: string): void {
       break;
     case "save-as":
       void saveDoc(true);
+      break;
+    case "export-html":
+      void exportHtmlDoc();
       break;
     case "close":
       void closeDoc(activeIndex);
@@ -951,6 +1180,7 @@ async function quit(): Promise<void> {
     });
     if (!discard) return;
   }
+  flushAutosave();
   persist();
   await appWindow.destroy();
 }
@@ -983,6 +1213,7 @@ async function showShortcuts(): Promise<void> {
     "  Ctrl+S          Save",
     "  Ctrl+Shift+S    Save as",
     "  Ctrl+W          Close tab",
+    "  Ctrl+Shift+E    Export standalone HTML",
     "  Ctrl+P          Print / export PDF",
     "  Ctrl+,          Preferences",
     "",
@@ -1024,6 +1255,7 @@ const KEY_ACTIONS: Record<string, string> = {
   "ctrl+shift+o": "open-folder",
   "ctrl+s": "save",
   "ctrl+shift+s": "save-as",
+  "ctrl+shift+e": "export-html",
   "ctrl+w": "close",
   "ctrl+p": "print",
   "ctrl+,": "preferences",
@@ -1155,6 +1387,7 @@ async function installDragDrop(): Promise<void> {
 
 async function installCloseGuard(): Promise<void> {
   await appWindow.onCloseRequested(async (event) => {
+    flushAutosave();
     if (!hasUnsaved()) {
       persist();
       return;
@@ -1198,6 +1431,7 @@ export async function initApp(): Promise<void> {
   renderPaneBar();
   document.documentElement.style.setProperty("--sidebar-width", `${sidebarWidth}px`);
   applyZoom();
+  await applyTheme(prefs.customCss);
 
   env = createEditor(el.editorHost, {
     onDocChanged: () => {
@@ -1207,6 +1441,7 @@ export async function initApp(): Promise<void> {
       renderTabs();
       updateStatus();
       scheduleSessionSave();
+      scheduleAutosave();
     },
     onSelectionChanged: () => updateStatus(),
   });
@@ -1239,6 +1474,19 @@ export async function initApp(): Promise<void> {
   });
 
   document.getElementById("sidebar-close")?.addEventListener("click", () => setSidebarVisible(false));
+
+  el.diskReload.addEventListener("click", () => {
+    const doc = activeDoc();
+    if (doc) void reloadDoc(doc);
+    else hideDiskBanner();
+  });
+  el.diskKeep.addEventListener("click", () => {
+    const doc = activeDoc();
+    // Keeping the buffer means the next autosave is allowed to overwrite the file.
+    if (doc) doc.conflict = false;
+    hideDiskBanner();
+  });
+  window.addEventListener("blur", flushAutosave);
 
   installToolbar();
   installPreferences();
@@ -1299,6 +1547,7 @@ export async function initApp(): Promise<void> {
   updateTitle();
   renderBreadcrumb();
   updateStatus();
+  startDiskWatch();
   syncToolbar();
 }
 
