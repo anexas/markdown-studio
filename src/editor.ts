@@ -69,18 +69,35 @@ const sourceTheme = EditorView.theme(
       backgroundColor: "var(--source-matching)",
       outline: "none",
     },
-    ".cm-panels": { backgroundColor: "var(--bg-chrome)", color: "var(--fg)" },
-    ".cm-tooltip": {
+    // CodeMirror's base theme paints panels, tooltips and the Find controls with fixed
+    // colours, choosing between its light and dark sets from that theme's static `dark`
+    // flag. This theme declares `dark: false` in every scheme, so its light set would win
+    // on equal specificity -- a pale button gradient and a white field under the theme's
+    // light text. Scoping to the editor root out-specifies those rules, so the variables
+    // decide the colours instead of the declaration order.
+    "&.cm-editor .cm-panels": { backgroundColor: "var(--bg-chrome)", color: "var(--fg)" },
+    "&.cm-editor .cm-panels-top": { borderBottom: "1px solid var(--border)" },
+    "&.cm-editor .cm-tooltip": {
       backgroundColor: "var(--bg-elevated)",
       color: "var(--fg)",
       border: "1px solid var(--border)",
     },
-    ".cm-textfield": { backgroundColor: "var(--bg)", color: "var(--fg)", border: "1px solid var(--border)" },
-    ".cm-button": {
+    "&.cm-editor .cm-textfield": {
+      backgroundColor: "var(--bg)",
+      color: "var(--fg)",
+      border: "1px solid var(--border)",
+    },
+    "&.cm-editor .cm-button": {
+      backgroundImage: "none",
       backgroundColor: "var(--bg-elevated)",
       color: "var(--fg)",
       border: "1px solid var(--border)",
     },
+    "&.cm-editor .cm-button:active": {
+      backgroundImage: "none",
+      backgroundColor: "var(--accent-soft)",
+    },
+    "&.cm-editor .cm-panel.cm-search [name=close]": { color: "var(--fg)" },
   },
   { dark: false },
 );
