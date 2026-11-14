@@ -4,7 +4,7 @@ A lightweight Markdown editor for Windows 11: raw source on one side, rendered H
 the other, built with Tauri 2 (WebView2) so the installer stays small and no Chromium
 is bundled.
 
-Version 0.10.2 — per-machine MSI, registered as the default handler for `.md`.
+Version 0.10.3 — per-machine MSI, registered as the default handler for `.md`.
 
 ## Features
 
